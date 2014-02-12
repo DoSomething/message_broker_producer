@@ -1,0 +1,84 @@
+<?php
+
+/**
+ * @file
+ * This module exposes the Message Broker object library to Drupal.
+ */
+
+/**
+ * Implements hook_libraries_info().
+ */
+function message_broker_producer_libraries_info() {
+  $libraries['message-broker-php-lib'] = array(
+    'name' => 'Message Broker PHP Library',
+    'vendor url' => 'http://www.dosomething.org/message-broker-php-lib',
+    'download url' => 'https://github.com/DoSomething/message-broker-php-lib',
+    'path' => 'lib',
+    'files' => array(
+      'php' => array(
+        'MessageBroker.php'
+      ),
+    ),
+    'version' => 1
+  );
+
+  return $libraries;
+}
+
+/**
+ * Implements hook_menu().
+ */
+function message_broker_producer_menu() {
+   $items['admin/config/services/message-broker-producer'] = array(
+    'title' => 'Message Broker settings',
+    'description' => 'Manage Message Broker settings.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('message_broker_producer_config_form'),
+    'access arguments' => array('administer messagebroker'),
+    'file' => 'message_broker.admin.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function message_broker_producer_permission() {
+  return array(
+    'administer message_broker_producer' =>  array(
+      'title' => t('Administer Message Broker Producer'),
+      'description' => t('Manage Message Broker Producer settings.'),
+    )
+  );
+}
+
+/**
+ * Makes an authenticated api request to Mobile Commons.
+ *
+ * @param $method
+ *   The api method to request.
+ *   @see For list of available methods - https://github.com/DoSomething/mobilecommons-php/blob/master/lib/MobileCommons/MobileCommons.php
+ * @param $params
+ *   An option associative array of parameters.
+ *
+ * @return
+ *   A SimpleXML response object.
+ */
+function message_broker_producer_request($method, $params = array()) {
+  $library = libraries_load('message-broker-php-lib');
+
+  if (empty($library['loaded'])) return FALSE;
+
+  $MessageBroker = new MessageBroker(
+    array(
+      'username' => variable_get('message_broker_producer_username', ''),
+      'password' => variable_get('message_broker_producer_password', '')
+    )
+  );
+
+  return $MessageBroker->$method($params);
+
+}
+
+
