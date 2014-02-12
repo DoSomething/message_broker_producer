@@ -14,10 +14,10 @@ function message_broker_producer_requirements($phase) {
 
   if ($phase == 'runtime') {
 
-    $library = libraries_detect('message-broker-php-lib');
+    $library = libraries_detect('messagebroker-phplib');
 
     if (empty($library['installed'])) {
-      $requirements['message-broker-php-lib'] = array(
+      $requirements['messagebroker-phplib'] = array(
         'title' => t('Message Broker PHP Library'),
         'value' => t('Any version'),
         'severity' => REQUIREMENT_ERROR,
