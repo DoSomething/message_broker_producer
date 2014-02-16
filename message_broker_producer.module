@@ -139,6 +139,7 @@ function message_broker_producer_request($method = '', $param = array()) {
 }
 
 /**
+ * EXAMPLE use in Drupal code base
  * Send test produceTransactional entry
  */
 function message_broker_producer_test() {
