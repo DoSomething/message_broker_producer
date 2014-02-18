@@ -30,7 +30,7 @@ function message_broker_producer_config_form($form, &$form_state) {
     '#type' => 'textfield',
     '#title' => t('Username'),
     '#required' => TRUE,
-    '#default_value' => variable_get('message_broker_producer_rabbitmq__username', 'guest'),
+    '#default_value' => variable_get('message_broker_producer_rabbitmq_username', 'guest'),
   );
   $form['authentication']['message_broker_producer_rabbitmq_password'] = array(
     '#type' => 'textfield',
