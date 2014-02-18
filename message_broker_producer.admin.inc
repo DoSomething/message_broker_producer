@@ -38,6 +38,12 @@ function message_broker_producer_config_form($form, &$form_state) {
     '#required' => TRUE,
     '#default_value' => variable_get('message_broker_producer_rabbitmq_password', 'guest'),
   );
+  $form['authentication']['message_broker_producer_rabbitmq_vhost'] = array(
+    '#type' => 'textfield',
+    '#title' => t('vhost'),
+    '#required' => TRUE,
+    '#default_value' => variable_get('message_broker_producer_rabbitmq_vhost', ''),
+  );
 
   $form['configuration'] = array(
     '#type' => 'fieldset',

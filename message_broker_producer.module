@@ -108,6 +108,7 @@ function message_broker_producer_request($method = '', $param = array()) {
         'port' => variable_get('message_broker_producer_rabbitmq_port', ''),
         'username' => variable_get('message_broker_producer_rabbitmq_username', ''),
         'password' => variable_get('message_broker_producer_rabbitmq_password', ''),
+        'vhost' => variable_get('message_broker_producer_rabbitmq_vhost', ''),
       );
       $MessageBroker = new MessageBroker($credentials);
 
@@ -139,7 +140,6 @@ function message_broker_producer_request($method = '', $param = array()) {
 }
 
 /**
- * EXAMPLE use in Drupal code base
  * Send test produceTransactional entry
  */
 function message_broker_producer_test() {
