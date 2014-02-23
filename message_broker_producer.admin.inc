@@ -41,7 +41,7 @@ function message_broker_producer_config_form($form, &$form_state) {
   $form['authentication']['message_broker_producer_rabbitmq_vhost'] = array(
     '#type' => 'textfield',
     '#title' => t('vhost'),
-    '#required' => TRUE,
+    '#required' => FALSE,
     '#default_value' => variable_get('message_broker_producer_rabbitmq_vhost', ''),
   );
 

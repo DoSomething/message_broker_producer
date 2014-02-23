@@ -116,7 +116,7 @@ function message_broker_producer_request($method = '', $param = array()) {
       // produceTransactional method call
       $param['activity_timestamp'] = time();
       $application_id = variable_get('message_broker_producer_application_id', NULL);
-      if (!empty($application_id)) {
+      if (!empty($application_id) && $application_id != -1) {
         $param['application_id'] = $application_id;
       }
       else {
