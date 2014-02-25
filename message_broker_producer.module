@@ -149,11 +149,11 @@ function message_broker_producer_test() {
     'email' => 'dlee+messagebroker-test@dosomething.org',
     'merge_vars' => array(
       'FNAME' => 'First-Name',
-      'CAMPAIGN-TITLE' => 'Campaign Test Title',
-      'ACTION' => 'Some call to action',
-      'STEP-ONE' => 'Step one from Do It',
-      'STEP-TWO' => 'Step two from Do It',
-      'STEP-THREE' => 'Step three from Do It',
+      'CAMPAIGN_TITLE' => 'Campaign Test Title',
+      'CALL_TO_ACTION' => 'Some call to action',
+      'STEP_ONE' => 'Step one from Do It',
+      'STEP_TWO' => 'Step two from Do It',
+      'STEP_THREE' => 'Step three from Do It',
     ),
   );
   message_broker_producer_request('produceTransactional', $payload);
