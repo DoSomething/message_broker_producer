@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * This module exposes the Message Broker object library to Drupal.
@@ -143,6 +142,7 @@ function message_broker_producer_request($method = '', $param = array()) {
  * Send test produceTransactional entry
  */
 function message_broker_producer_test() {
+
   $payload = array(
     'activity' => 'campaign-signup',
     'event_id' => 8012345,
