@@ -16,10 +16,9 @@ function message_broker_producer_drush_command() {
   );
 }
 
-/*
+/**
  * Drush command to trigger sending Mandrill based message based on Drupal
  * producer entry:
- *
  */
 function drush_message_broker_producer_test() {
   try {

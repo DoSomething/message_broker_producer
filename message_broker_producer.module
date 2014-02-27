@@ -22,7 +22,7 @@ function message_broker_producer_libraries_info() {
   return $libraries;
 }
 
-/*
+/**
  * Implements hook_theme()
  */
 function message_broker_producer_theme($existing, $type, $theme, $path) {
@@ -167,7 +167,7 @@ function message_broker_producer_test() {
   message_broker_producer_request('produceTransactional', $payload);
 }
 
-/*
+/**
  * Wrapper function for message_broker_producer_test() as the function can be
  * called from both the admin UI as a link and a Drush command.
  */
