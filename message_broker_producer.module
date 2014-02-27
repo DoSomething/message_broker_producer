@@ -28,7 +28,7 @@ function message_broker_producer_libraries_info() {
 function message_broker_producer_theme($existing, $type, $theme, $path) {
   return array(
     'message_broker_producer_status' => array(
-      'variables' => array('status' => array()),
+      'variables' => array('status' => array(), 'test_link' => array()),
       'template' => 'templates/message-broker-producer-status',
     ),
   );
@@ -157,4 +157,6 @@ function message_broker_producer_test() {
     ),
   );
   message_broker_producer_request('produceTransactional', $payload);
+  drupal_set_message('Producer test sent.', 'status');
+  drupal_goto('admin/config/services/message-broker-producer/status');
 }
