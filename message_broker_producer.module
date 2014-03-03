@@ -109,7 +109,11 @@ function message_broker_producer_request($method = '', $param = array()) {
         'password' => variable_get('message_broker_producer_rabbitmq_password', ''),
         'vhost' => variable_get('message_broker_producer_rabbitmq_vhost', ''),
       );
-      $MessageBroker = new MessageBroker($credentials);
+      $config = array(
+        'transactionalExchange' => variable_get('message_broker_producer_rabbitmq_transactionalExchange', ''),
+        'queueName' => variable_get('message_broker_producer_rabbitmq_queueName', ''),
+      );
+      $MessageBroker = new MessageBroker($credentials, $config);
 
       // Add 'activity_timestamp' and 'application_id' to $param for
       // produceTransactional method call

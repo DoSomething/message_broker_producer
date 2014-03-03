@@ -55,6 +55,18 @@ function message_broker_producer_config_form($form, &$form_state) {
     '#required' => TRUE,
     '#default_value' => variable_get('message_broker_producer_application_id', '-1'),
   );
+  $form['configuration']['message_broker_producer_rabbitmq_transactionalExchange'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Application ID'),
+    '#required' => TRUE,
+    '#default_value' => variable_get('message_broker_producer_rabbitmq_transactionalExchange', 'transactionals-exchange'),
+  );
+  $form['configuration']['message_broker_producer_rabbitmq_queueName'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Application ID'),
+    '#required' => TRUE,
+    '#default_value' => variable_get('message_broker_producer_rabbitmq_queueName', 'transactionals-queue'),
+  );
 
   return system_settings_form($form);
 }
