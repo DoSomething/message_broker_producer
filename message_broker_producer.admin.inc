@@ -107,7 +107,9 @@ function message_broker_producer_status() {
   }
 
   // Test link to produce tranactionals queue entry
-  $test_link = 'Generate ' . l('test producer entry', 'admin/config/services/message-broker-producer-test') . '.';
+  $test_links['all'] = 'Generate ' . l('test producer entry', 'admin/config/services/message-broker-producer/test') . '.';
+  $test_links['campaign-signup'] = 'Generate ' . l('test campaign-signup producer entry', 'admin/config/services/message-broker-producer/test/campaign-signup') . '.';
+  $test_links['user-register'] = 'Generate ' . l('test user-register producer entry', 'admin/config/services/message-broker-producer/test/user-register') . '.';
 
-  return theme('message_broker_producer_status', array('status' => $status, 'test_link' => $test_link));
+  return theme('message_broker_producer_status', array('status' => $status, 'test_links' => $test_links));
 }
