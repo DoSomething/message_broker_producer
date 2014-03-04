@@ -28,7 +28,7 @@ function message_broker_producer_libraries_info() {
 function message_broker_producer_theme($existing, $type, $theme, $path) {
   return array(
     'message_broker_producer_status' => array(
-      'variables' => array('status' => array(), 'test_link' => array()),
+      'variables' => array('status' => array(), 'test_links' => array()),
       'template' => 'templates/message-broker-producer-status',
     ),
   );
@@ -65,6 +65,13 @@ function message_broker_producer_menu() {
     'title' => 'Message Broker TEST',
     'description' => 'Message Broker Producer TEST',
     'page callback' => 'message_broker_producer_test_page',
+    'access arguments' => array('administer message_broker_producer'),
+  );
+  $items['admin/config/services/message-broker-producer-test/%'] = array(
+    'title' => 'Message Broker TEST',
+    'description' => 'Message Broker Producer TEST',
+    'page callback' => 'message_broker_producer_test_page',
+    'page arguments' => array(4),
     'access arguments' => array('administer message_broker_producer'),
   );
 
@@ -111,7 +118,6 @@ function message_broker_producer_request($method = '', $param = array()) {
       );
       $config = array(
         'transactionalExchange' => variable_get('message_broker_producer_rabbitmq_transactionalExchange', ''),
-        'queueName' => variable_get('message_broker_producer_rabbitmq_queueName', ''),
       );
       $MessageBroker = new MessageBroker($credentials, $config);
 
@@ -153,22 +159,36 @@ function message_broker_producer_request($method = '', $param = array()) {
  * merge_var values are specific to the Mandrill service used by the related
  * consumer to send email messages.
  */
-function message_broker_producer_test() {
+function message_broker_producer_test($action) {
 
-  $payload = array(
-    'activity' => 'campaign-signup',
-    'event_id' => 8012345,
-    'email' => 'dlee+messagebroker-test@dosomething.org',
-    'merge_vars' => array(
-      'FNAME' => 'First-Name',
-      'CAMPAIGN_TITLE' => 'Campaign Test Title',
-      'CALL_TO_ACTION' => 'Some call to action',
-      'STEP_ONE' => 'Step one from Do It',
-      'STEP_TWO' => 'Step two from Do It',
-      'STEP_THREE' => 'Step three from Do It',
-    ),
-  );
-  message_broker_producer_request('produceTransactional', $payload);
+  if (empty($action) || $action == 'campaign-signup' || $action == 1) {
+    $payload = array(
+      'activity' => 'campaign-signup',
+      'event_id' => 8012345,
+      'email' => 'dlee+messagebroker-test-campaign-signup@dosomething.org',
+      'merge_vars' => array(
+        'FNAME' => 'First-Name',
+        'CAMPAIGN_TITLE' => 'Campaign Test Title',
+        'CALL_TO_ACTION' => 'Some call to action',
+        'STEP_ONE' => 'Step one from Do It',
+        'STEP_TWO' => 'Step two from Do It',
+        'STEP_THREE' => 'Step three from Do It',
+      ),
+    );
+    message_broker_producer_request('produceTransactional', $payload);
+  }
+
+  if (empty($action) || $action == 'user-register' || $action == 2) {
+    $payload = array(
+      'activity' => 'user-register',
+      'email' => 'dlee+messagebroker-testnew-user@dosomething.org',
+      'merge_vars' => array(
+        'FNAME' => 'First-Name',
+        'UID' => 1234
+      ),
+    );
+    message_broker_producer_request('produceTransactional', $payload);
+  }
 }
 
 /**
