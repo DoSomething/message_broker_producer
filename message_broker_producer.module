@@ -15,7 +15,7 @@ function message_broker_producer_libraries_info() {
     'download url' => 'https://github.com/DoSomething/messagebroker-phplib',
     'version' => '1.0',
     'files' => array(
-      'php' => array('MessageBroker.php'),
+      'php' => array('MessageBroker-Drupal.php'),
     ),
   );
 
