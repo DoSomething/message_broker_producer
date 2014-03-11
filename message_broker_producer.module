@@ -135,7 +135,7 @@ function message_broker_producer_request($method = '', $param = array()) {
       }
 
       $param = json_encode($param);
-      return $MessageBroker->$method($param);
+      return $messageBroker->$method($param);
 
     }
     else {
