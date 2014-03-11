@@ -119,7 +119,7 @@ function message_broker_producer_request($method = '', $param = array()) {
       $config = array(
         'transactionalExchange' => variable_get('message_broker_producer_rabbitmq_transactionalExchange', ''),
       );
-      $MessageBroker = new MessageBroker($credentials, $config);
+      $messageBroker = new MessageBroker($credentials, $config);
 
       // Add 'activity_timestamp' and 'application_id' to $param for
       // produceTransactional method call
