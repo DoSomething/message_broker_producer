@@ -116,6 +116,7 @@ function message_broker_producer_request($method = '', $param = array()) {
         'password' => variable_get('message_broker_producer_rabbitmq_password', ''),
         'vhost' => variable_get('message_broker_producer_rabbitmq_vhost', ''),
       );
+      // @todo: Connect these values to admin interface settings
       $config = array(
         'queue' => array(
           'name' => 'transactionalQueue',
