@@ -117,7 +117,20 @@ function message_broker_producer_request($method = '', $param = array()) {
         'vhost' => variable_get('message_broker_producer_rabbitmq_vhost', ''),
       );
       $config = array(
-        'transactionalExchange' => variable_get('message_broker_producer_rabbitmq_transactional_exchange', ''),
+        'queue' => array(
+          'name' => 'transactionalQueue',
+          'passive' => FALSE,
+          'durable' => TRUE,
+          'exclusive' => FALSE,
+          'auto_delete' => FALSE,
+        ),
+        'exchange' => array(
+          'name' => 'transactionalExchange',
+          'type' => 'topic',
+          'passive' => FALSE,
+          'durable' => TRUE,
+          'auto_delete' => FALSE,
+        ),
         'routingKey' => 'transactional',
       );
       $messageBroker = new MessageBroker($credentials, $config);
