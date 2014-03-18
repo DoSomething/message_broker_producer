@@ -118,13 +118,6 @@ function message_broker_producer_request($method = '', $param = array()) {
       );
       // @todo: Connect these values to admin interface settings
       $config = array(
-        'queue' => array(
-          'name' => 'transactionalQueue',
-          'passive' => FALSE,
-          'durable' => TRUE,
-          'exclusive' => FALSE,
-          'auto_delete' => FALSE,
-        ),
         'exchange' => array(
           'name' => 'transactionalExchange',
           'type' => 'topic',
@@ -132,7 +125,34 @@ function message_broker_producer_request($method = '', $param = array()) {
           'durable' => TRUE,
           'auto_delete' => FALSE,
         ),
-        'routingKey' => 'transactional',
+        'queue' => array(
+          'registrations' => array(
+            'name' => 'userRegistrationQueue',
+            'passive' => FALSE,
+            'durable' => TRUE,
+            'exclusive' => FALSE,
+            'auto_delete' => FALSE,
+          ),
+          'campaign_signups' => array(
+            'name' => 'mailchimpCampaignSignupQueue',
+            'passive' => FALSE,
+            'durable' => TRUE,
+            'exclusive' => FALSE,
+            'auto_delete' => FALSE,
+          ),
+          'transactional' => array(
+            'name' => 'transactionalQueue',
+            'passive' => FALSE,
+            'durable' => TRUE,
+            'exclusive' => FALSE,
+            'auto_delete' => FALSE,
+          )
+        ),
+        'routingKey' => array(
+          'registrations' => 'user.registration.*',
+          'campaign_signups' => 'campaign.signup.*',
+          'transactional' => '*.*.transactional',
+        ),
       );
       $messageBroker = new MessageBroker($credentials, $config);
 
@@ -183,7 +203,7 @@ function message_broker_producer_test($action = NULL) {
     $payload = array(
       'activity' => 'campaign-signup',
       'event_id' => 8012345,
-      'email' => 'dlee+messagebroker-test-campaign-signup@dosomething.org',
+      'email' => 'dlee+messagebroker-test-campaign-signup' . rand(1, 99) . '@dosomething.org',
       'merge_vars' => array(
         'FNAME' => 'First-Name',
         'CAMPAIGN_TITLE' => 'Campaign Test Title',
@@ -199,7 +219,7 @@ function message_broker_producer_test($action = NULL) {
   if (empty($action) || $action == 'user-register' || $action == 2) {
     $payload = array(
       'activity' => 'user-register',
-      'email' => 'dlee+messagebroker-testnew-user@dosomething.org',
+      'email' => 'dlee+messagebroker.testnew.user.' . rand(1, 99) . '@dosomething.org',
       'merge_vars' => array(
         'FNAME' => 'First-Name',
         'UID' => 1234
