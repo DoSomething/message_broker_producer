@@ -202,7 +202,7 @@ function message_broker_producer_test($action = NULL) {
   if (empty($action) || $action == 'campaign_signup' || $action == 1) {
     $payload = array(
       'activity' => 'campaign_signup',
-      'email' => 'dlee+messagebroker-test-user-password' . rand(1, 99) . '@dosomething.org',
+      'email' => 'dlee+messagebroker-test-campaign-signup' . rand(1, 99) . '@dosomething.org',
       'uid' => '11119',
       'merge_vars' => array(
         'FNAME' => 'First-Name',
@@ -219,7 +219,7 @@ function message_broker_producer_test($action = NULL) {
   if (empty($action) || $action == 'campaign_reportback' || $action == 2) {
     $payload = array(
       'activity' => 'campaign_reportback',
-      'email' => 'dlee+messagebroker-test-user-password' . rand(1, 99) . '@dosomething.org',
+      'email' => 'dlee+messagebroker-test-campaign-reportback' . rand(1, 99) . '@dosomething.org',
       'uid' => '22229',
       'merge_vars' => array(
         'FNAME' => 'First-Name',
@@ -247,9 +247,21 @@ function message_broker_producer_test($action = NULL) {
   if (empty($action) || $action == 'user_register' || $action == 4) {
     $payload = array(
       'activity' => 'user_register',
-      'email' => 'dlee+messagebroker-test-user-register' . rand(1, 99) . '@dosomething.org',
+      'email' => 'dlee+messagebroker-test-user-register-over' . rand(1, 99) . '@dosomething.org',
       'uid' => '44449',
       'birthdate' => 929232000, // 13 June 1999 (over 13)
+      'merge_vars' => array(
+        'FNAME' => 'First-Name',
+      ),
+    );
+    message_broker_producer_request('produceTransactional', $payload);
+  }
+  if (empty($action) || $action == 'user_register' || $action == 5) {
+    $payload = array(
+      'activity' => 'user_register',
+      'email' => 'dlee+messagebroker-test-user-register-under' . rand(1, 99) . '@dosomething.org',
+      'uid' => '44449',
+      'birthdate' => 1087084800, // 13 June 2004 (under 13)
       'merge_vars' => array(
         'FNAME' => 'First-Name',
       ),
