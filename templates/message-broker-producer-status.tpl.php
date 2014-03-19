@@ -9,6 +9,11 @@
   <li><?php print $test_links['all'] ?></li>
   <ul>
     <li><?php print $test_links['campaign-signup'] ?></li>
+    <li><?php print $test_links['campaign-reportback'] ?></li>
+    <li><?php print $test_links['user-password'] ?></li>
     <li><?php print $test_links['user-register'] ?></li>
+    <li><?php print $test_links['user-register-under'] ?></li>
+    <li><?php print $test_links['campaign-signup-noname'] ?></li>
+    <li><?php print $test_links['campaign-reportback-noname'] ?></li>
   </ul>
 </ul>
