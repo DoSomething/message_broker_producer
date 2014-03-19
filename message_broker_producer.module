@@ -256,7 +256,7 @@ function message_broker_producer_test($action = NULL) {
     );
     message_broker_producer_request('produceTransactional', $payload);
   }
-  if (empty($action) || $action == 'user_register' || $action == 5) {
+  if (empty($action) || $action == 'user_register_under' || $action == 5) {
     $payload = array(
       'activity' => 'user_register',
       'email' => 'dlee+messagebroker-test-user-register-under' . rand(1, 99) . '@dosomething.org',
@@ -268,8 +268,38 @@ function message_broker_producer_test($action = NULL) {
     );
     message_broker_producer_request('produceTransactional', $payload);
   }
-
-
+  if (empty($action) || $action == 'campaign_signup_noname' || $action == 6) {
+    $payload = array(
+      'activity' => 'campaign_signup',
+      'email' => 'dlee+messagebroker-test-campaign-signup-noname' . rand(1, 99) . '@dosomething.org',
+      'uid' => '11119',
+      'merge_vars' => array(
+        'FNAME' => '',
+        'CAMPAIGN_TITLE' => 'Campaign Title',
+        'CAMPAIGN_LINK' => 'http://campaign-link.org',
+        'CALL_TO_ACTION' => 'Call To Action',
+        'STEP_ONE' => 'Step One',
+        'STEP_TWO' => 'Step Two',
+        'STEP_THREE' => 'Step Three',
+      ),
+    );
+    message_broker_producer_request('produceTransactional', $payload);
+  }
+  if (empty($action) || $action == 'campaign_reportback_noname' || $action == 7) {
+    $payload = array(
+      'activity' => 'campaign_reportback',
+      'email' => 'dlee+messagebroker-test-campaign-reportback-noname' . rand(1, 99) . '@dosomething.org',
+      'uid' => '22229',
+      'merge_vars' => array(
+        'FNAME' => '',
+        'CAMPAIGN_TITLE' => 'Campaign Title',
+        'IMPACT_VERB' => 'Impact Verb',
+        'IMPACT_NUMBER' => 'Impact Number',
+        'IMPACT_NOUN' => 'Impact Noun',
+      ),
+    );
+    message_broker_producer_request('produceTransactional', $payload);
+  }
 
 }
 
