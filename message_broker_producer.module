@@ -205,6 +205,7 @@ function message_broker_producer_test($action = NULL) {
       'email' => 'dlee+messagebroker-test-campaign-signup' . rand(1, 99) . '@dosomething.org',
       'uid' => '11119',
       'event_id' => '99991',
+      'mailchimp_group_id' => '191919',
       'merge_vars' => array(
         'FNAME' => 'First-Name',
         'CAMPAIGN_TITLE' => 'Campaign Title',
