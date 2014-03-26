@@ -108,68 +108,113 @@ function message_broker_producer_request($method = '', $param = array()) {
   if (!empty($library['loaded'])) {
     if (!empty($method)) {
 
-      // Connect to RabbitMQ
-      $credentials = array(
-        'host' => variable_get('message_broker_producer_rabbitmq_host', ''),
-        'port' => variable_get('message_broker_producer_rabbitmq_port', ''),
-        'username' => variable_get('message_broker_producer_rabbitmq_username', ''),
-        'password' => variable_get('message_broker_producer_rabbitmq_password', ''),
-        'vhost' => variable_get('message_broker_producer_rabbitmq_vhost', ''),
-      );
-      // @todo: Connect these values to admin interface settings
-      $config = array(
-        'exchange' => array(
-          'name' => 'transactionalExchange',
-          'type' => 'topic',
-          'passive' => FALSE,
-          'durable' => TRUE,
-          'auto_delete' => FALSE,
-        ),
-        'queue' => array(
-          'registrations' => array(
-            'name' => 'userRegistrationQueue',
-            'passive' => FALSE,
-            'durable' => TRUE,
-            'exclusive' => FALSE,
-            'auto_delete' => FALSE,
-          ),
-          'campaign_signups' => array(
-            'name' => 'mailchimpCampaignSignupQueue',
-            'passive' => FALSE,
-            'durable' => TRUE,
-            'exclusive' => FALSE,
-            'auto_delete' => FALSE,
-          ),
-          'transactional' => array(
-            'name' => 'transactionalQueue',
-            'passive' => FALSE,
-            'durable' => TRUE,
-            'exclusive' => FALSE,
-            'auto_delete' => FALSE,
-          )
-        ),
-        'routingKey' => array(
-          'registrations' => 'user.registration.*',
-          'campaign_signups' => 'campaign.signup.*',
-          'transactional' => '*.*.transactional',
-        ),
-      );
-      $messageBroker = new MessageBroker($credentials, $config);
+      // Supported methods
+      if ($method == 'produceTransactional') {
 
-      // Add 'activity_timestamp' and 'application_id' to $param for
-      // produceTransactional method call
-      $param['activity_timestamp'] = time();
-      $application_id = variable_get('message_broker_producer_application_id', NULL);
-      if (!empty($application_id) && $application_id != -1) {
-        $param['application_id'] = $application_id;
+        // Add 'activity_timestamp' and 'application_id' to $param for
+        // produceTransactional method call
+        $param['activity_timestamp'] = time();
+        $application_id = variable_get('message_broker_producer_application_id', NULL);
+        if (!empty($application_id) && $application_id != -1) {
+          $param['application_id'] = $application_id;
+        }
+        else {
+          drupal_set_message('The application ID has not been set.', 'error');
+          return;
+        }
+
+        // Connect to RabbitMQ
+        $credentials = array(
+          'host' => variable_get('message_broker_producer_rabbitmq_host', ''),
+          'port' => variable_get('message_broker_producer_rabbitmq_port', ''),
+          'username' => variable_get('message_broker_producer_rabbitmq_username', ''),
+          'password' => variable_get('message_broker_producer_rabbitmq_password', ''),
+          'vhost' => variable_get('message_broker_producer_rabbitmq_vhost', ''),
+        );
+
+        // Determine routingKey based on activity define in $param
+        switch ($param['activity']) {
+            case 'campaign_signup':
+            case 'campaign-signup':
+              $routingKey = 'campaign.signup.transactional';
+              break;
+            case 'campaign_reportback':
+            case 'campaign-reportback':
+              $routingKey = 'campaign.campaign_reportback.transactional';
+              break;
+            case 'user_password':
+            case 'user-password':
+              $routingKey = 'user.password_reset.transactional';
+              break;
+            case 'user_register':
+            case 'user-register':
+              $routingKey = 'user.registration.transactional';
+              break;
+
+            default:
+              throw new Exception('Undefined activity "' . $param->activity .
+                '" sent to produceTransactional in messagebroker-phplib.');
+        }
+
+        $config = array(
+          'exchange' => array(
+            'name' => 'transactionalExchange',
+            'type' => 'topic',
+            'passive' => FALSE,
+            'durable' => TRUE,
+            'auto_delete' => FALSE,
+          ),
+          'queue' => array(
+            'registrations' => array(
+              'name' => 'userRegistrationQueue',
+              'passive' => FALSE,
+              'durable' => TRUE,
+              'exclusive' => FALSE,
+              'auto_delete' => FALSE,
+              'bindingKey' => 'user.registration.*',
+            ),
+            'campaign_signups' => array(
+              'name' => 'mailchimpCampaignSignupQueue',
+              'passive' => FALSE,
+              'durable' => TRUE,
+              'exclusive' => FALSE,
+              'auto_delete' => FALSE,
+              'bindingKey' => 'campaign.signup.*',
+            ),
+            'transactional' => array(
+              'name' => 'transactionalQueue',
+              'passive' => FALSE,
+              'durable' => TRUE,
+              'exclusive' => FALSE,
+              'auto_delete' => FALSE,
+              'bindingKey' => '*.*.transactional',
+            )
+          ),
+          'routingKey' => $routingKey,
+        );
+        $messageBroker = new MessageBroker($credentials, $config);
+
+        // Add 'activity_timestamp' and 'application_id' to $param for
+        // produceTransactional method call
+        $param['activity_timestamp'] = time();
+        $application_id = variable_get('message_broker_producer_application_id', NULL);
+        if (!empty($application_id) && $application_id != -1) {
+          $param['application_id'] = $application_id;
+        }
+        else {
+          drupal_set_message('The application ID has not been set.', 'error');
+          return;
+        }
+
+        $message = serialize($param);
+        return $messageBroker->publishMessage($message);
+
       }
       else {
-        drupal_set_message('The application ID has not been set.', 'error');
+        // Consider using $messageBroker->$method($param) if it's a call to functionality in the library
+        drupal_set_message('Unsupported method "' . $method . '" sent to  message_broker_producer_request()', 'error');
         return;
       }
-
-      $param = json_encode($param);
-      return $messageBroker->$method($param);
 
     }
     else {
@@ -205,8 +250,6 @@ function message_broker_producer_test($action = NULL) {
       'email' => 'dlee+messagebroker-test-campaign-signup' . rand(1, 99) . '@dosomething.org',
       'uid' => '11119',
       'event_id' => '99991',
-      'mailchimp_grouping_id' => '10637',
-      'mailchimp_group_name' => 'PBJamSlam2014',
       'merge_vars' => array(
         'FNAME' => 'First-Name',
         'CAMPAIGN_TITLE' => 'Campaign Title',
@@ -226,7 +269,7 @@ function message_broker_producer_test($action = NULL) {
       'uid' => '22229',
       'event_id' => '99992',
       'mailchimp_grouping_id' => '10637',
-      'mailchimp_group_name' => 'PBJamSlam2014',
+-     'mailchimp_group_name' => 'PBJamSlam2014',
       'merge_vars' => array(
         'FNAME' => 'First-Name',
         'CAMPAIGN_TITLE' => 'Campaign Title',
