@@ -188,6 +188,22 @@ function message_broker_producer_request($method = '', $param = array()) {
               'exclusive' => FALSE,
               'auto_delete' => FALSE,
               'bindingKey' => '*.*.transactional',
+            ),
+            'userAPIRegistration' => array(
+              'name' => 'userAPIRegistrationQueue',
+              'passive' => FALSE,
+              'durable' => TRUE,
+              'exclusive' => FALSE,
+              'auto_delete' => FALSE,
+              'bindingKey' => 'user.registration.*',
+            ),
+            'userAPICampaignActivity' => array(
+              'name' => 'userAPICampaignActivity',
+              'passive' => FALSE,
+              'durable' => TRUE,
+              'exclusive' => FALSE,
+              'auto_delete' => FALSE,
+              'bindingKey' => 'campaign.*.*',
             )
           ),
           'routingKey' => $routingKey,
