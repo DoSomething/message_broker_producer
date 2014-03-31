@@ -69,7 +69,7 @@ function message_broker_producer_config_form($form, &$form_state) {
     '#type' => 'textfield',
     '#title' => t('type'),
     '#required' => TRUE,
-    '#default_value' => variable_get('message_broker_producer_exchange_transactional_type', 'topc'),
+    '#default_value' => variable_get('message_broker_producer_exchange_transactional_type', 'topic'),
   );
   $form['configuration']['exchange']['message_broker_producer_exchange_transactional_passive'] = array(
     '#type' => 'textfield',
@@ -94,209 +94,209 @@ function message_broker_producer_config_form($form, &$form_state) {
     '#type' => 'fieldset',
     '#title' => t('Queues')
   );
-  $form['configuration']['queues']['userRegistrationQueue'] = array(
+  $form['configuration']['queues']['user_registration_queue'] = array(
     '#type' => 'fieldset',
     '#title' => t('userRegistrationQueue')
   );
-  $form['configuration']['queues']['userRegistrationQueue']['message_broker_producer_queue_registrations_name'] = array(
+  $form['configuration']['queues']['user_registration_queue']['message_broker_producer_queue_registrations_name'] = array(
     '#type' => 'textfield',
     '#title' => t('name'),
     '#required' => TRUE,
-    '#default_value' => variable_get('message_broker_producer_queue_registrations_name', 'userRegistrationQueue'),
+    '#default_value' => variable_get('message_broker_producer_queue_registrations_name', 'user_registration_queue'),
   );
-  $form['configuration']['queues']['userRegistrationQueue']['message_broker_producer_queue_registrations_passive'] = array(
+  $form['configuration']['queues']['user_registration_queue']['message_broker_producer_queue_registrations_passive'] = array(
     '#type' => 'textfield',
     '#title' => t('passive'),
     '#required' => TRUE,
     '#default_value' => variable_get('message_broker_producer_queue_registrations_passive', '0'),
   );
-  $form['configuration']['queues']['userRegistrationQueue']['message_broker_producer_queue_registrations_durable'] = array(
+  $form['configuration']['queues']['user_registration_queue']['message_broker_producer_queue_registrations_durable'] = array(
     '#type' => 'textfield',
     '#title' => t('durable'),
     '#required' => TRUE,
     '#default_value' => variable_get('message_broker_producer_queue_registrations_durable', '1'),
   );
-  $form['configuration']['queues']['userRegistrationQueue']['message_broker_producer_queue_registrations_exclusive'] = array(
+  $form['configuration']['queues']['user_registration_queue']['message_broker_producer_queue_registrations_exclusive'] = array(
     '#type' => 'textfield',
     '#title' => t('exclusive'),
     '#required' => TRUE,
     '#default_value' => variable_get('message_broker_producer_queue_registrations_exclusive', '0'),
   );
-  $form['configuration']['queues']['userRegistrationQueue']['message_broker_producer_queue_registrations_auto_delete'] = array(
+  $form['configuration']['queues']['user_registration_queue']['message_broker_producer_queue_registrations_auto_delete'] = array(
     '#type' => 'textfield',
     '#title' => t('auto_delete'),
     '#required' => TRUE,
     '#default_value' => variable_get('message_broker_producer_queue_registrations_auto_delete', '0'),
   );
-  $form['configuration']['queues']['userRegistrationQueue']['message_broker_producer_queue_registrations_bindingKey'] = array(
+  $form['configuration']['queues']['user_registration_queue']['message_broker_producer_queue_registrations_binding_key'] = array(
     '#type' => 'textfield',
     '#title' => t('bindingKey'),
     '#required' => TRUE,
-    '#default_value' => variable_get('message_broker_producer_queue_registrations_bindingKey', 'user.registration.*'),
+    '#default_value' => variable_get('message_broker_producer_queue_registrations_binding_key', 'user.registration.*'),
   );
 
-  $form['configuration']['queues']['mailchimpCampaignSignupQueue'] = array(
+  $form['configuration']['queues']['mailchimp_campaign_signup_queue'] = array(
     '#type' => 'fieldset',
     '#title' => t('mailchimpCampaignSignupQueue')
   );
-  $form['configuration']['queues']['mailchimpCampaignSignupQueue']['message_broker_producer_queue_campaign_signups_name'] = array(
+  $form['configuration']['queues']['mailchimp_campaign_signup_queue']['message_broker_producer_queue_campaign_signups_name'] = array(
     '#type' => 'textfield',
     '#title' => t('name'),
     '#required' => TRUE,
     '#default_value' => variable_get('message_broker_producer_queue_campaign_signups_name', 'mailchimpCampaignSignupQueue'),
   );
-  $form['configuration']['queues']['mailchimpCampaignSignupQueue']['message_broker_producer_queue_campaign_signups_passive'] = array(
+  $form['configuration']['queues']['mailchimp_campaign_signup_queue']['message_broker_producer_queue_campaign_signups_passive'] = array(
     '#type' => 'textfield',
     '#title' => t('passive'),
     '#required' => TRUE,
     '#default_value' => variable_get('message_broker_producer_queue_campaign_signups_passive', '0'),
   );
-  $form['configuration']['queues']['mailchimpCampaignSignupQueue']['message_broker_producer_queue_campaign_signups_durable'] = array(
+  $form['configuration']['queues']['mailchimp_campaign_signup_queue']['message_broker_producer_queue_campaign_signups_durable'] = array(
     '#type' => 'textfield',
     '#title' => t('durable'),
     '#required' => TRUE,
     '#default_value' => variable_get('message_broker_producer_queue_campaign_signups_durable', '1'),
   );
-  $form['configuration']['queues']['mailchimpCampaignSignupQueue']['message_broker_producer_queue_campaign_signups_exclusive'] = array(
+  $form['configuration']['queues']['mailchimp_campaign_signup_queue']['message_broker_producer_queue_campaign_signups_exclusive'] = array(
     '#type' => 'textfield',
     '#title' => t('exclusive'),
     '#required' => TRUE,
     '#default_value' => variable_get('message_broker_producer_queue_campaign_signups_exclusive', '0'),
   );
-  $form['configuration']['queues']['mailchimpCampaignSignupQueue']['message_broker_producer_queue_campaign_signups_auto_delete'] = array(
+  $form['configuration']['queues']['mailchimp_campaign_signup_queue']['message_broker_producer_queue_campaign_signups_auto_delete'] = array(
     '#type' => 'textfield',
     '#title' => t('auto_delete'),
     '#required' => TRUE,
     '#default_value' => variable_get('message_broker_producer_queue_campaign_signups_auto_delete', '0'),
   );
-  $form['configuration']['queues']['mailchimpCampaignSignupQueue']['message_broker_producer_queue_campaign_signups_bindingKey'] = array(
+  $form['configuration']['queues']['mailchimp_campaign_signup_queue']['message_broker_producer_queue_campaign_signups_binding+key'] = array(
     '#type' => 'textfield',
     '#title' => t('bindingKey'),
     '#required' => TRUE,
-    '#default_value' => variable_get('message_broker_producer_queue_campaign_signups_bindingKey', 'campaign.signup.*'),
+    '#default_value' => variable_get('message_broker_producer_queue_campaign_signups_binding_key', 'campaign.signup.*'),
   );
 
-  $form['configuration']['queues']['transactionalQueue'] = array(
+  $form['configuration']['queues']['transactional_queue'] = array(
     '#type' => 'fieldset',
     '#title' => t('transactionalQueue')
   );
-  $form['configuration']['queues']['transactionalQueue']['message_broker_producer_queue_transactional_name'] = array(
+  $form['configuration']['queues']['transactional_queue']['message_broker_producer_queue_transactional_name'] = array(
     '#type' => 'textfield',
     '#title' => t('name'),
     '#required' => TRUE,
     '#default_value' => variable_get('message_broker_producer_queue_transactional_name', 'transactionalQueue'),
   );
-  $form['configuration']['queues']['transactionalQueue']['message_broker_producer_queue_transactional_passive'] = array(
+  $form['configuration']['queues']['transactional_queue']['message_broker_producer_queue_transactional_passive'] = array(
     '#type' => 'textfield',
     '#title' => t('passive'),
     '#required' => TRUE,
     '#default_value' => variable_get('message_broker_producer_queue_transactional_passive', '0'),
   );
-  $form['configuration']['queues']['transactionalQueue']['message_broker_producer_queue_transactional_durable'] = array(
+  $form['configuration']['queues']['transactional_queue']['message_broker_producer_queue_transactional_durable'] = array(
     '#type' => 'textfield',
     '#title' => t('durable'),
     '#required' => TRUE,
     '#default_value' => variable_get('message_broker_producer_queue_transactional_durable', '1'),
   );
-  $form['configuration']['queues']['transactionalQueue']['message_broker_producer_queue_transactional_exclusive'] = array(
+  $form['configuration']['queues']['transactional_queue']['message_broker_producer_queue_transactional_exclusive'] = array(
     '#type' => 'textfield',
     '#title' => t('exclusive'),
     '#required' => TRUE,
     '#default_value' => variable_get('message_broker_producer_queue_transactional_exclusive', '0'),
   );
-  $form['configuration']['queues']['transactionalQueue']['message_broker_producer_queue_transactional_auto_delete'] = array(
+  $form['configuration']['queues']['transactional_queue']['message_broker_producer_queue_transactional_auto_delete'] = array(
     '#type' => 'textfield',
     '#title' => t('auto_delete'),
     '#required' => TRUE,
     '#default_value' => variable_get('message_broker_producer_queue_transactional_auto_delete', '0'),
   );
-  $form['configuration']['queues']['transactionalQueue']['message_broker_producer_queue_transactional_bindingKey'] = array(
+  $form['configuration']['queues']['transactional_queue']['message_broker_producer_queue_transactional_binding_key'] = array(
     '#type' => 'textfield',
     '#title' => t('bindingKey'),
     '#required' => TRUE,
-    '#default_value' => variable_get('message_broker_producer_queue_transactional_bindingKey', '*.*.transactional'),
+    '#default_value' => variable_get('message_broker_producer_queue_transactional_binding_key', '*.*.transactional'),
   );
 
-  $form['configuration']['queues']['userAPIRegistrationQueue'] = array(
+  $form['configuration']['queues']['user_API_registration_queue'] = array(
     '#type' => 'fieldset',
     '#title' => t('userAPIRegistrationQueue')
   );
-  $form['configuration']['queues']['userAPIRegistrationQueue']['message_broker_producer_queue_userAPIRegistration_name'] = array(
+  $form['configuration']['queues']['user_API_registration_queue']['message_broker_producer_queue_user_API_registration_name'] = array(
     '#type' => 'textfield',
     '#title' => t('name'),
     '#required' => TRUE,
-    '#default_value' => variable_get('message_broker_producer_queue_userAPIRegistration_name', 'userAPIRegistrationQueue'),
+    '#default_value' => variable_get('message_broker_producer_queue_user_API_registration_name', 'userAPIRegistrationQueue'),
   );
-  $form['configuration']['queues']['userAPIRegistrationQueue']['message_broker_producer_queue_userAPIRegistration_passive'] = array(
+  $form['configuration']['queues']['user_API_registration_queue']['message_broker_producer_queue_user_API_registration_passive'] = array(
     '#type' => 'textfield',
     '#title' => t('passive'),
     '#required' => TRUE,
-    '#default_value' => variable_get('message_broker_producer_queue_userAPIRegistration_passive', '0'),
+    '#default_value' => variable_get('message_broker_producer_queue_user_API_registration_passive', '0'),
   );
-  $form['configuration']['queues']['userAPIRegistrationQueue']['message_broker_producer_queue_userAPIRegistration_durable'] = array(
+  $form['configuration']['queues']['user_API_registration_queue']['message_broker_producer_queue_user_API_registration_durable'] = array(
     '#type' => 'textfield',
     '#title' => t('durable'),
     '#required' => TRUE,
-    '#default_value' => variable_get('message_broker_producer_queue_userAPIRegistration_durable', '1'),
+    '#default_value' => variable_get('message_broker_producer_queue_user_API_registration_durable', '1'),
   );
-  $form['configuration']['queues']['userAPIRegistrationQueue']['message_broker_producer_queue_userAPIRegistration_exclusive'] = array(
+  $form['configuration']['queues']['user_API_registration_queue']['message_broker_producer_queue_user_API_registration_exclusive'] = array(
     '#type' => 'textfield',
     '#title' => t('exclusive'),
     '#required' => TRUE,
-    '#default_value' => variable_get('message_broker_producer_queue_userAPIRegistration_exclusive', '0'),
+    '#default_value' => variable_get('message_broker_producer_queue_user_API_registration_exclusive', '0'),
   );
-  $form['configuration']['queues']['userAPIRegistrationQueue']['message_broker_producer_queue_userAPIRegistration_auto_delete'] = array(
+  $form['configuration']['queues']['user_API_registration_queue']['message_broker_producer_queue_userAPIRegistration_auto_delete'] = array(
     '#type' => 'textfield',
     '#title' => t('auto_delete'),
     '#required' => TRUE,
     '#default_value' => variable_get('message_broker_producer_queue_userAPIRegistration_auto_delete', '0'),
   );
-  $form['configuration']['queues']['userAPIRegistrationQueue']['message_broker_producer_queue_userAPIRegistration_bindingKey'] = array(
+  $form['configuration']['queues']['user_API_registration_queue']['message_broker_producer_queue_user_API_registration_binding_key'] = array(
     '#type' => 'textfield',
     '#title' => t('bindingKey'),
     '#required' => TRUE,
-    '#default_value' => variable_get('message_broker_producer_queue_userAPIRegistration_bindingKey', 'user.registration.*'),
+    '#default_value' => variable_get('message_broker_producer_queue_user_API_registration_binding_key', 'user.registration.*'),
   );
 
-  $form['configuration']['queues']['userAPICampaignActivityQueue'] = array(
+  $form['configuration']['queues']['user_API_campaign_activity_queue'] = array(
     '#type' => 'fieldset',
     '#title' => t('userAPIRegistrationQueue')
   );
-  $form['configuration']['queues']['userAPICampaignActivityQueue']['message_broker_producer_queue_userAPIRegistration_userAPICampaignActivity_name'] = array(
+  $form['configuration']['queues']['user_API_campaign_activity_queue']['message_broker_producer_queue_user_API_registration_user_API_campaign_activity_name'] = array(
     '#type' => 'textfield',
     '#title' => t('name'),
     '#required' => TRUE,
-    '#default_value' => variable_get('message_broker_producer_queue_userAPICampaignActivity_name', 'userAPIRegistrationQueue'),
+    '#default_value' => variable_get('message_broker_producer_queue_user_API_registration_user_API_campaign_activity_name', 'userAPIRegistrationQueue'),
   );
-  $form['configuration']['queues']['userAPICampaignActivityQueue']['message_broker_producer_queue_userAPICampaignActivity_passive'] = array(
+  $form['configuration']['queues']['user_API_campaign_activity_queue']['message_broker_producer_queue_user_API_registration_user_API_campaign_activity_passive'] = array(
     '#type' => 'textfield',
     '#title' => t('passive'),
     '#required' => TRUE,
-    '#default_value' => variable_get('message_broker_producer_queue_userAPICampaignActivity_passive', '0'),
+    '#default_value' => variable_get('message_broker_producer_queue_user_API_registration_user_API_campaign_activity_passive', '0'),
   );
-  $form['configuration']['queues']['userAPICampaignActivityQueue']['message_broker_producer_queue_userAPICampaignActivity_durable'] = array(
+  $form['configuration']['queues']['user_API_campaign_activity_queue']['message_broker_producer_queue_user_API_registration_user_API_campaign_activity_durable'] = array(
     '#type' => 'textfield',
     '#title' => t('durable'),
     '#required' => TRUE,
-    '#default_value' => variable_get('message_broker_producer_queue_userAPICampaignActivity_durable', '1'),
+    '#default_value' => variable_get('message_broker_producer_queue_user_API_registration_user_API_campaign_activity_durable', '1'),
   );
-  $form['configuration']['queues']['userAPICampaignActivityQueue']['message_broker_producer_queue_userAPICampaignActivity_exclusive'] = array(
+  $form['configuration']['queues']['user_API_campaign_activity_queue']['message_broker_producer_queue_user_API_registration_user_API_campaign_activity_exclusive'] = array(
     '#type' => 'textfield',
     '#title' => t('exclusive'),
     '#required' => TRUE,
-    '#default_value' => variable_get('message_broker_producer_queue_userAPICampaignActivity_exclusive', '0'),
+    '#default_value' => variable_get('message_broker_producer_queue_user_API_registration_user_API_campaign_activity_exclusive', '0'),
   );
-  $form['configuration']['queues']['userAPICampaignActivityQueue']['message_broker_producer_queue_userAPICampaignActivity_auto_delete'] = array(
+  $form['configuration']['queues']['user_API_campaign_activity_queue']['message_broker_producer_queue_user_API_registration_user_API_campaign_activity_auto_delete'] = array(
     '#type' => 'textfield',
     '#title' => t('auto_delete'),
     '#required' => TRUE,
-    '#default_value' => variable_get('message_broker_producer_queue_userAPICampaignActivity_auto_delete', '0'),
+    '#default_value' => variable_get('message_broker_producer_queue_user_API_registration_user_API_campaign_activity_auto_delete', '0'),
   );
-  $form['configuration']['queues']['userAPICampaignActivityQueue']['message_broker_producer_queue_userAPICampaignActivity_bindingKey'] = array(
+  $form['configuration']['queues']['user_API_campaign_activity_queue']['message_broker_producer_queue_user_API_registration_user_API_campaign_activity_binding_key'] = array(
     '#type' => 'textfield',
     '#title' => t('bindingKey'),
     '#required' => TRUE,
-    '#default_value' => variable_get('message_broker_producer_queue_userAPICampaignActivity_bindingKey', 'campaign.*.*'),
+    '#default_value' => variable_get('message_broker_producer_queue_user_API_registration_user_API_campaign_activity_binding_key', 'campaign.*.*'),
   );
 
   return system_settings_form($form);
