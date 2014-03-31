@@ -136,19 +136,19 @@ function message_broker_producer_request($method = '', $param = array()) {
         switch ($param['activity']) {
             case 'campaign_signup':
             case 'campaign-signup':
-              $routingKey = 'campaign.signup.transactional';
+              $routing_key = 'campaign.signup.transactional';
               break;
             case 'campaign_reportback':
             case 'campaign-reportback':
-              $routingKey = 'campaign.campaign_reportback.transactional';
+              $routing_key = 'campaign.campaign_reportback.transactional';
               break;
             case 'user_password':
             case 'user-password':
-              $routingKey = 'user.password_reset.transactional';
+              $routing_key = 'user.password_reset.transactional';
               break;
             case 'user_register':
             case 'user-register':
-              $routingKey = 'user.registration.transactional';
+              $routing_key = 'user.registration.transactional';
               break;
 
             default:
@@ -206,7 +206,7 @@ function message_broker_producer_request($method = '', $param = array()) {
               'bindingKey' => variable_get('message_broker_producer_queue_user_API_registration_user_API_campaign_activity_binding_key'),
             )
           ),
-          'routingKey' => $routingKey,
+          'routingKey' => $routing_key,
         );
         $messageBroker = new MessageBroker($credentials, $config);
 
