@@ -198,12 +198,12 @@ function message_broker_producer_request($method = '', $param = array()) {
               'bindingKey' => variable_get('message_broker_producer_queue_user_API_registration_binding_key'),
             ),
             'userAPICampaignActivity' => array(
-              'name' => variable_get('message_broker_producer_queue_user_API_registration_user_API_campaign_activity_name'),
-              'passive' => variable_get('message_broker_producer_queue_user_API_registration_user_API_campaign_activity_passive'),
-              'durable' => variable_get('message_broker_producer_queue_user_API_registration_user_API_campaign_activity_durable'),
-              'exclusive' => variable_get('message_broker_producer_queue_user_API_registration_user_API_campaign_activity_exclusive'),
-              'auto_delete' => variable_get('message_broker_producer_queue_user_API_registration_user_API_campaign_activity_auto_delete'),
-              'bindingKey' => variable_get('message_broker_producer_queue_user_API_registration_user_API_campaign_activity_binding_key'),
+              'name' => variable_get('message_broker_producer_queue_user_API_campaign_activity_name'),
+              'passive' => variable_get('message_broker_producer_queue_user_API_campaign_activity_passive'),
+              'durable' => variable_get('message_broker_producer_queue_user_API_campaign_activity_durable'),
+              'exclusive' => variable_get('message_broker_producer_queue_user_API_campaign_activity_exclusive'),
+              'auto_delete' => variable_get('message_broker_producer_queue_user_API_campaign_activity_auto_delete'),
+              'bindingKey' => variable_get('message_broker_producer_queue_user_API_campaign_activity_binding_key'),
             )
           ),
           'routingKey' => $routing_key,
