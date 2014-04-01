@@ -1,6 +1,6 @@
 name = "Message Broker Producer"
 description = "This module provided producer access to the Message Broker system."
-version = 0.1.11
+version = 0.1.12
 core = 7.x
 
 dependencies[] = libraries
