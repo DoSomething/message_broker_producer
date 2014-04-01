@@ -260,13 +260,13 @@ function message_broker_producer_config_form($form, &$form_state) {
 
   $form['configuration']['queues']['user_API_campaign_activity_queue'] = array(
     '#type' => 'fieldset',
-    '#title' => t('userAPIRegistrationQueue')
+    '#title' => t('userAPICampaignActivity')
   );
   $form['configuration']['queues']['user_API_campaign_activity_queue']['message_broker_producer_queue_user_API_campaign_activity_name'] = array(
     '#type' => 'textfield',
     '#title' => t('name'),
     '#required' => TRUE,
-    '#default_value' => variable_get('message_broker_producer_queue_user_API_registration_user_API_campaign_activity_name', 'userAPIRegistrationQueue'),
+    '#default_value' => variable_get('message_broker_producer_queue_user_API_campaign_activity_name', 'userAPICampaignActivityQueue'),
   );
   $form['configuration']['queues']['user_API_campaign_activity_queue']['message_broker_producer_queue_user_API_campaign_activity_passive'] = array(
     '#type' => 'textfield',
