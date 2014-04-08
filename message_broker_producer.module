@@ -125,7 +125,7 @@ function message_broker_producer_request($method = '', $param = array()) {
 
         // Connect to RabbitMQ
         $credentials = array(
-          'host' => variable_get('message_broker_producer_rabbitmq_host', '10.241.0.14'),
+          'host' => variable_get('message_broker_producer_rabbitmq_host', 'localhost'),
           'port' => variable_get('message_broker_producer_rabbitmq_port', '5672'),
           'username' => variable_get('message_broker_producer_rabbitmq_username', 'guest'),
           'password' => variable_get('message_broker_producer_rabbitmq_password', 'guest'),
