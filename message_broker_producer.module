@@ -125,10 +125,10 @@ function message_broker_producer_request($method = '', $param = array()) {
 
         // Connect to RabbitMQ
         $credentials = array(
-          'host' => variable_get('message_broker_producer_rabbitmq_host', ''),
-          'port' => variable_get('message_broker_producer_rabbitmq_port', ''),
-          'username' => variable_get('message_broker_producer_rabbitmq_username', ''),
-          'password' => variable_get('message_broker_producer_rabbitmq_password', ''),
+          'host' => variable_get('message_broker_producer_rabbitmq_host', '10.241.0.14'),
+          'port' => variable_get('message_broker_producer_rabbitmq_port', '5672'),
+          'username' => variable_get('message_broker_producer_rabbitmq_username', 'guest'),
+          'password' => variable_get('message_broker_producer_rabbitmq_password', 'guest'),
           'vhost' => variable_get('message_broker_producer_rabbitmq_vhost', ''),
         );
 
@@ -158,57 +158,62 @@ function message_broker_producer_request($method = '', $param = array()) {
 
         $config = array(
           'exchange' => array(
-            'name' => variable_get('message_broker_producer_exchange_transactional_name'),
-            'type' => variable_get('message_broker_producer_exchange_transactional_type'),
-            'passive' => variable_get('message_broker_producer_exchange_transactional_passive'),
-            'durable' => variable_get('message_broker_producer_exchange_transactional_durable'),
-            'auto_delete' => variable_get('message_broker_producer_exchange_transactional_auto_delete'),
+            'name' => variable_get('message_broker_producer_exchange_transactional_name', 'transactionalExchange'),
+            'type' => variable_get('message_broker_producer_exchange_transactional_type', 'topic'),
+            'passive' => variable_get('message_broker_producer_exchange_transactional_passive', 0),
+            'durable' => variable_get('message_broker_producer_exchange_transactional_durable', 1),
+            'auto_delete' => variable_get('message_broker_producer_exchange_transactional_auto_delete', 0),
           ),
           'queue' => array(
             'registrations' => array(
-              'name' => variable_get('message_broker_producer_queue_registrations_name'),
-              'passive' => variable_get('message_broker_producer_queue_registrations_passive'),
-              'durable' => variable_get('message_broker_producer_queue_registrations_durable'),
-              'exclusive' => variable_get('message_broker_producer_queue_registrations_exclusive'),
-              'auto_delete' => variable_get('message_broker_producer_queue_registrations_auto_delete'),
-              'bindingKey' => variable_get('message_broker_producer_queue_registrations_binding_key'),
+              'name' => variable_get('message_broker_producer_queue_registrations_name', 'userRegistrationQueue'),
+              'passive' => variable_get('message_broker_producer_queue_registrations_passive', 0),
+              'durable' => variable_get('message_broker_producer_queue_registrations_durable', 1),
+              'exclusive' => variable_get('message_broker_producer_queue_registrations_exclusive', 0),
+              'auto_delete' => variable_get('message_broker_producer_queue_registrations_auto_delete', 0),
+              'bindingKey' => variable_get('message_broker_producer_queue_registrations_binding_key', 'user.registration.*'),
             ),
             'campaign_signups' => array(
-              'name' => variable_get('message_broker_producer_queue_campaign_signups_name'),
-              'passive' => variable_get('message_broker_producer_queue_campaign_signups_passive'),
-              'durable' => variable_get('message_broker_producer_queue_campaign_signups_durable'),
-              'exclusive' => variable_get('message_broker_producer_queue_campaign_signups_exclusive'),
-              'auto_delete' => variable_get('message_broker_producer_queue_campaign_signups_auto_delete'),
-              'bindingKey' => variable_get('message_broker_producer_queue_campaign_signups_binding_key'),
+              'name' => variable_get('message_broker_producer_queue_campaign_signups_name', 'mailchimpCampaignSignupQueue'),
+              'passive' => variable_get('message_broker_producer_queue_campaign_signups_passive', 0),
+              'durable' => variable_get('message_broker_producer_queue_campaign_signups_durable', 1),
+              'exclusive' => variable_get('message_broker_producer_queue_campaign_signups_exclusive', 0),
+              'auto_delete' => variable_get('message_broker_producer_queue_campaign_signups_auto_delete', 0),
+              'bindingKey' => variable_get('message_broker_producer_queue_campaign_signups_binding_key', 'campaign.signup.*'),
             ),
             'transactional' => array(
-              'name' => variable_get('message_broker_producer_queue_transactional_name'),
-              'passive' => variable_get('message_broker_producer_queue_transactional_passive'),
-              'durable' => variable_get('message_broker_producer_queue_transactional_durable'),
-              'exclusive' => variable_get('message_broker_producer_queue_transactional_exclusive'),
-              'auto_delete' => variable_get('message_broker_producer_queue_transactional_auto_delete'),
-              'bindingKey' => variable_get('message_broker_producer_queue_transactional_binding_key'),
+              'name' => variable_get('message_broker_producer_queue_transactional_name', 'transactionalQueue'),
+              'passive' => variable_get('message_broker_producer_queue_transactional_passive', 0),
+              'durable' => variable_get('message_broker_producer_queue_transactional_durable', 1),
+              'exclusive' => variable_get('message_broker_producer_queue_transactional_exclusive', 0),
+              'auto_delete' => variable_get('message_broker_producer_queue_transactional_auto_delete', 0),
+              'bindingKey' => variable_get('message_broker_producer_queue_transactional_binding_key', '*.*.transactional'),
             ),
             'userAPIRegistration' => array(
-              'name' => variable_get('message_broker_producer_queue_user_API_registration_name'),
-              'passive' => variable_get('message_broker_producer_queue_user_API_registration_passive'),
-              'durable' => variable_get('message_broker_producer_queue_user_API_registration_durable'),
-              'exclusive' => variable_get('message_broker_producer_queue_user_API_registration_exclusive'),
-              'auto_delete' => variable_get('message_broker_producer_queue_user_API_registration_auto_delete'),
-              'bindingKey' => variable_get('message_broker_producer_queue_user_API_registration_binding_key'),
+              'name' => variable_get('message_broker_producer_queue_user_API_registration_name', 'userAPIRegistrationQueue'),
+              'passive' => variable_get('message_broker_producer_queue_user_API_registration_passive', 0),
+              'durable' => variable_get('message_broker_producer_queue_user_API_registration_durable', 1),
+              'exclusive' => variable_get('message_broker_producer_queue_user_API_registration_exclusive', 0),
+              'auto_delete' => variable_get('message_broker_producer_queue_user_API_registration_auto_delete', 0),
+              'bindingKey' => variable_get('message_broker_producer_queue_user_API_registration_binding_key', 'user.registration.*'),
             ),
             'userAPICampaignActivity' => array(
-              'name' => variable_get('message_broker_producer_queue_user_API_campaign_activity_name'),
-              'passive' => variable_get('message_broker_producer_queue_user_API_campaign_activity_passive'),
-              'durable' => variable_get('message_broker_producer_queue_user_API_campaign_activity_durable'),
-              'exclusive' => variable_get('message_broker_producer_queue_user_API_campaign_activity_exclusive'),
-              'auto_delete' => variable_get('message_broker_producer_queue_user_API_campaign_activity_auto_delete'),
-              'bindingKey' => variable_get('message_broker_producer_queue_user_API_campaign_activity_binding_key'),
+              'name' => variable_get('message_broker_producer_queue_user_API_campaign_activity_name', 'userAPICampaignActivityQueue'),
+              'passive' => variable_get('message_broker_producer_queue_user_API_campaign_activity_passive', 0),
+              'durable' => variable_get('message_broker_producer_queue_user_API_campaign_activity_durable', 1),
+              'exclusive' => variable_get('message_broker_producer_queue_user_API_campaign_activity_exclusive', 0),
+              'auto_delete' => variable_get('message_broker_producer_queue_user_API_campaign_activity_auto_delete', 0),
+              'bindingKey' => variable_get('message_broker_producer_queue_user_API_campaign_activity_binding_key', 'campaign.*.*'),
             )
           ),
           'routingKey' => $routing_key,
         );
-        $messageBroker = new MessageBroker($credentials, $config);
+        try {
+          $messageBroker = new MessageBroker($credentials, $config);
+        }
+        catch (Exception $e) {
+          drupal_set_message('Failed to create MessageBroker library (messagebroker-phplib) instance. Check configuration settings in ' . l('administration interface', '/admin/config/services/message-broker-producer/mq-settings') . '.', 'error');
+        }
 
         // Add 'activity_timestamp' and 'application_id' to $param for
         // produceTransactional method call
