@@ -209,26 +209,27 @@ function message_broker_producer_request($method = '', $param = array()) {
           'routingKey' => $routing_key,
         );
         try {
+
           $messageBroker = new MessageBroker($credentials, $config);
+
+          // Add 'activity_timestamp' and 'application_id' to $param for
+          // produceTransactional method call
+          $param['activity_timestamp'] = time();
+          $application_id = variable_get('message_broker_producer_application_id', NULL);
+          if (!empty($application_id) && $application_id != -1) {
+            $param['application_id'] = $application_id;
+          }
+          else {
+            drupal_set_message('The application ID has not been set.', 'error');
+            return;
+          }
+
+          $message = serialize($param);
+          return $messageBroker->publishMessage($message);
         }
         catch (Exception $e) {
           drupal_set_message('Failed to create MessageBroker library (messagebroker-phplib) instance. Check configuration settings in ' . l('administration interface', '/admin/config/services/message-broker-producer/mq-settings') . '.', 'error');
         }
-
-        // Add 'activity_timestamp' and 'application_id' to $param for
-        // produceTransactional method call
-        $param['activity_timestamp'] = time();
-        $application_id = variable_get('message_broker_producer_application_id', NULL);
-        if (!empty($application_id) && $application_id != -1) {
-          $param['application_id'] = $application_id;
-        }
-        else {
-          drupal_set_message('The application ID has not been set.', 'error');
-          return;
-        }
-
-        $message = serialize($param);
-        return $messageBroker->publishMessage($message);
 
       }
       else {
