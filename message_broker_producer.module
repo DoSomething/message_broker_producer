@@ -93,9 +93,9 @@ function message_broker_producer_permission() {
 /**
  * Makes request to Message Broker PHP Library and RabbitMQ.
  *
- * @param $method
- *   A value to define the type of message request. Currently supports
- *   produceTransactional and produceCampaignCache
+ * @param $productionType
+ *   A value to define the type of production. Currently supports
+ *   produceTransactional and produceCampaignCache producer activities.
  *
  * @param $params
  *   An option associative array of parameters.
@@ -103,7 +103,7 @@ function message_broker_producer_permission() {
  * @return
  *   A SimpleXML response object.
  */
-function message_broker_producer_request($method = '', $param = array()) {
+function message_broker_producer_request($productionType = '', $param = array()) {
 
   $library = libraries_load('messagebroker-phplib');
   if (!empty($library['loaded'])) {
@@ -129,7 +129,7 @@ function message_broker_producer_request($method = '', $param = array()) {
       );
 
       // Supported methods - produceTransactional, cacheCampaign
-      if ($method == 'produceTransactional') {
+      if ($productionType == 'produceTransactional') {
 
         // Determine routingKey based on activity define in $param
         switch ($param['activity']) {
@@ -209,7 +209,7 @@ function message_broker_producer_request($method = '', $param = array()) {
         );
 
       }
-      elseif ($method == 'produceCampaignCache') {
+      elseif ($productionType == 'produceCampaignCache') {
 
         $config = array(
           'exchange' => array(
