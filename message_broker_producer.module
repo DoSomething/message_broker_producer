@@ -94,8 +94,9 @@ function message_broker_producer_permission() {
  * Makes request to Message Broker PHP Library and RabbitMQ.
  *
  * @param $method
- *   The api method to request.
- *   @see For list of available methods - https://github.com/DoSomething/mobilecommons-php/blob/master/lib/MobileCommons/MobileCommons.php
+ *   A value to define the type of message request. Currently supports
+ *   produceTransactional and produceCampaignCache
+ *
  * @param $params
  *   An option associative array of parameters.
  *
@@ -108,29 +109,27 @@ function message_broker_producer_request($method = '', $param = array()) {
   if (!empty($library['loaded'])) {
     if (!empty($method)) {
 
-      // Supported methods
+      // Add 'activity_timestamp' and 'application_id' to all $param
+      $param['activity_timestamp'] = time();
+      $application_id = variable_get('message_broker_producer_application_id', NULL);
+      if (!empty($application_id) && $application_id != -1) {
+        $param['application_id'] = $application_id;
+      }
+      else {
+        drupal_set_message('The application ID has not been set.', 'error');
+        return;
+      }
+
+      $credentials = array(
+        'host' => variable_get('message_broker_producer_rabbitmq_host', 'localhost'),
+        'port' => variable_get('message_broker_producer_rabbitmq_port', '5672'),
+        'username' => variable_get('message_broker_producer_rabbitmq_username', 'guest'),
+        'password' => variable_get('message_broker_producer_rabbitmq_password', 'guest'),
+        'vhost' => variable_get('message_broker_producer_rabbitmq_vhost', ''),
+      );
+
+      // Supported methods - produceTransactional, cacheCampaign
       if ($method == 'produceTransactional') {
-
-        // Add 'activity_timestamp' and 'application_id' to $param for
-        // produceTransactional method call
-        $param['activity_timestamp'] = time();
-        $application_id = variable_get('message_broker_producer_application_id', NULL);
-        if (!empty($application_id) && $application_id != -1) {
-          $param['application_id'] = $application_id;
-        }
-        else {
-          drupal_set_message('The application ID has not been set.', 'error');
-          return;
-        }
-
-        // Connect to RabbitMQ
-        $credentials = array(
-          'host' => variable_get('message_broker_producer_rabbitmq_host', 'localhost'),
-          'port' => variable_get('message_broker_producer_rabbitmq_port', '5672'),
-          'username' => variable_get('message_broker_producer_rabbitmq_username', 'guest'),
-          'password' => variable_get('message_broker_producer_rabbitmq_password', 'guest'),
-          'vhost' => variable_get('message_broker_producer_rabbitmq_vhost', ''),
-        );
 
         // Determine routingKey based on activity define in $param
         switch ($param['activity']) {
@@ -208,34 +207,44 @@ function message_broker_producer_request($method = '', $param = array()) {
           ),
           'routingKey' => $routing_key,
         );
-        try {
 
-          $messageBroker = new MessageBroker($credentials, $config);
+      }
+      elseif ($method == 'produceCampaignCache') {
 
-          // Add 'activity_timestamp' and 'application_id' to $param for
-          // produceTransactional method call
-          $param['activity_timestamp'] = time();
-          $application_id = variable_get('message_broker_producer_application_id', NULL);
-          if (!empty($application_id) && $application_id != -1) {
-            $param['application_id'] = $application_id;
-          }
-          else {
-            drupal_set_message('The application ID has not been set.', 'error');
-            return;
-          }
-
-          $message = serialize($param);
-          return $messageBroker->publishMessage($message);
-        }
-        catch (Exception $e) {
-          drupal_set_message('Failed to create MessageBroker library (messagebroker-phplib) instance. Check configuration settings in ' . l('administration interface', '/admin/config/services/message-broker-producer/mq-settings') . '.', 'error');
-        }
+        $config = array(
+          'exchange' => array(
+            'name' => variable_get('message_broker_producer_exchange_cache_name', 'cacheExchange'),
+            'type' => variable_get('message_broker_producer_exchange_cache_type', 'direct'),
+            'passive' => variable_get('message_broker_producer_exchange_cache_passive', 0),
+            'durable' => variable_get('message_broker_producer_exchange_cache_durable', 1),
+            'auto_delete' => variable_get('message_broker_producer_exchange_cache_auto_delete', 0),
+          ),
+          'queue' => array(
+            'cache' => array(
+              'name' => variable_get('message_broker_producer_queue_cache_name', 'cacheQueue'),
+              'passive' => variable_get('message_broker_producer_queue_cache_passive', 0),
+              'durable' => variable_get('message_broker_producer_queue_cache_durable', 0),
+              'exclusive' => variable_get('message_broker_producer_queue_cache_exclusive', 0),
+              'auto_delete' => variable_get('message_broker_producer_queue_cache_auto_delete', 1),
+              'bindingKey' => variable_get('message_broker_producer_queue_cache_binding_key', 'cache'),
+            ),
+          ),
+          'routingKey' => 'cache',
+        );
 
       }
       else {
-        // Consider using $messageBroker->$method($param) if it's a call to functionality in the library
         drupal_set_message('Unsupported method "' . $method . '" sent to  message_broker_producer_request()', 'error');
         return;
+      }
+
+      try {
+        $messageBroker = new MessageBroker($credentials, $config);
+        $message = serialize($param);
+        return $messageBroker->publishMessage($message);
+      }
+      catch (Exception $e) {
+        drupal_set_message('Failed to create MessageBroker library (messagebroker-phplib) instance. Check configuration settings in ' . l('administration interface', '/admin/config/services/message-broker-producer/mq-settings') . '.', 'error');
       }
 
     }
