@@ -99,9 +99,6 @@ function message_broker_producer_permission() {
  *
  * @param $params
  *   An option associative array of parameters.
- *
- * @return
- *   A SimpleXML response object.
  */
 function message_broker_producer_request($productionType = '', $param = array()) {
 
@@ -213,23 +210,23 @@ function message_broker_producer_request($productionType = '', $param = array())
 
         $config = array(
           'exchange' => array(
-            'name' => variable_get('message_broker_producer_exchange_cache_name', 'cacheExchange'),
+            'name' => variable_get('message_broker_producer_exchange_cache_name', 'directCacheExchange'),
             'type' => variable_get('message_broker_producer_exchange_cache_type', 'direct'),
             'passive' => variable_get('message_broker_producer_exchange_cache_passive', 0),
             'durable' => variable_get('message_broker_producer_exchange_cache_durable', 1),
             'auto_delete' => variable_get('message_broker_producer_exchange_cache_auto_delete', 0),
           ),
           'queue' => array(
-            'cache' => array(
-              'name' => variable_get('message_broker_producer_queue_cache_name', 'cacheQueue'),
+            'campaignCache' => array(
+              'name' => variable_get('message_broker_producer_queue_cache_name', 'campaignCacheQueue'),
               'passive' => variable_get('message_broker_producer_queue_cache_passive', 0),
-              'durable' => variable_get('message_broker_producer_queue_cache_durable', 0),
+              'durable' => variable_get('message_broker_producer_queue_cache_durable', 1),
               'exclusive' => variable_get('message_broker_producer_queue_cache_exclusive', 0),
-              'auto_delete' => variable_get('message_broker_producer_queue_cache_auto_delete', 1),
-              'bindingKey' => variable_get('message_broker_producer_queue_cache_binding_key', 'cache'),
+              'auto_delete' => variable_get('message_broker_producer_queue_cache_auto_delete', 0),
+              'bindingKey' => variable_get('message_broker_producer_queue_cache_binding_key', 'campaignCache'),
             ),
           ),
-          'routingKey' => 'cache',
+          'routingKey' => variable_get('message_broker_producer_queue_cache_routing_key', 'campaignCache'),
         );
 
       }
@@ -241,7 +238,8 @@ function message_broker_producer_request($productionType = '', $param = array())
       try {
         $messageBroker = new MessageBroker($credentials, $config);
         $message = serialize($param);
-        return $messageBroker->publishMessage($message);
+        $messageBroker->publishMessage($message);
+        return;
       }
       catch (Exception $e) {
         drupal_set_message('Failed to create MessageBroker library (messagebroker-phplib) instance. Check configuration settings in ' . l('administration interface', '/admin/config/services/message-broker-producer/mq-settings') . '.', 'error');
