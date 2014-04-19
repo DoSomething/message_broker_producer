@@ -218,15 +218,15 @@ function message_broker_producer_request($productionType = '', $param = array())
           ),
           'queue' => array(
             'campaignCache' => array(
-              'name' => variable_get('message_broker_producer_queue_cache_name', 'campaignCacheQueue'),
-              'passive' => variable_get('message_broker_producer_queue_cache_passive', 0),
-              'durable' => variable_get('message_broker_producer_queue_cache_durable', 1),
-              'exclusive' => variable_get('message_broker_producer_queue_cache_exclusive', 0),
-              'auto_delete' => variable_get('message_broker_producer_queue_cache_auto_delete', 0),
-              'bindingKey' => variable_get('message_broker_producer_queue_cache_binding_key', 'campaignCache'),
+              'name' => variable_get('message_broker_producer_queue_campaign_cache_name', 'campaignCacheQueue'),
+              'passive' => variable_get('message_broker_producer_queue_campaign_cache_passive', 0),
+              'durable' => variable_get('message_broker_producer_queue_campaign_cache_durable', 1),
+              'exclusive' => variable_get('message_broker_producer_queue_campaign_cache_exclusive', 0),
+              'auto_delete' => variable_get('message_broker_producer_queue_campaign_cache_auto_delete', 0),
+              'bindingKey' => variable_get('message_broker_producer_queue_campaign_cache_binding_key', 'campaignCache'),
             ),
           ),
-          'routingKey' => variable_get('message_broker_producer_queue_cache_routing_key', 'campaignCache'),
+          'routingKey' => variable_get('message_broker_producer_queue_campaign_cache_routing_key', 'campaignCache'),
         );
 
       }
