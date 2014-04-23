@@ -57,7 +57,7 @@ function message_broker_producer_config_form($form, &$form_state) {
   );
   $form['configuration']['exchange'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Exchange')
+    '#title' => t('transactional Exchange')
   );
   $form['configuration']['exchange']['message_broker_producer_exchange_transactional_name'] = array(
     '#type' => 'textfield',
@@ -96,7 +96,7 @@ function message_broker_producer_config_form($form, &$form_state) {
   );
   $form['configuration']['queues']['user_registration_queue'] = array(
     '#type' => 'fieldset',
-    '#title' => t('userRegistrationQueue')
+    '#title' => t('User Registration Queue')
   );
   $form['configuration']['queues']['user_registration_queue']['message_broker_producer_queue_registrations_name'] = array(
     '#type' => 'textfield',
@@ -137,7 +137,7 @@ function message_broker_producer_config_form($form, &$form_state) {
 
   $form['configuration']['queues']['mailchimp_campaign_signup_queue'] = array(
     '#type' => 'fieldset',
-    '#title' => t('mailchimpCampaignSignupQueue')
+    '#title' => t('Mailchimp Campaign Signup Queue')
   );
   $form['configuration']['queues']['mailchimp_campaign_signup_queue']['message_broker_producer_queue_campaign_signups_name'] = array(
     '#type' => 'textfield',
@@ -178,7 +178,7 @@ function message_broker_producer_config_form($form, &$form_state) {
 
   $form['configuration']['queues']['transactional_queue'] = array(
     '#type' => 'fieldset',
-    '#title' => t('transactionalQueue')
+    '#title' => t('Transactional Queue')
   );
   $form['configuration']['queues']['transactional_queue']['message_broker_producer_queue_transactional_name'] = array(
     '#type' => 'textfield',
@@ -219,7 +219,7 @@ function message_broker_producer_config_form($form, &$form_state) {
 
   $form['configuration']['queues']['user_API_registration_queue'] = array(
     '#type' => 'fieldset',
-    '#title' => t('userAPIRegistrationQueue')
+    '#title' => t('User API Registration Queue')
   );
   $form['configuration']['queues']['user_API_registration_queue']['message_broker_producer_queue_user_API_registration_name'] = array(
     '#type' => 'textfield',
@@ -260,7 +260,7 @@ function message_broker_producer_config_form($form, &$form_state) {
 
   $form['configuration']['queues']['user_API_campaign_activity_queue'] = array(
     '#type' => 'fieldset',
-    '#title' => t('userAPICampaignActivity')
+    '#title' => t('User API Campaign Activity')
   );
   $form['configuration']['queues']['user_API_campaign_activity_queue']['message_broker_producer_queue_user_API_campaign_activity_name'] = array(
     '#type' => 'textfield',
@@ -297,6 +297,86 @@ function message_broker_producer_config_form($form, &$form_state) {
     '#title' => t('bindingKey'),
     '#required' => TRUE,
     '#default_value' => variable_get('message_broker_producer_queue_user_API_campaign_activity_binding_key', 'campaign.*.*'),
+  );
+
+  $form['configuration']['exchange_cache'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Cache Exchange')
+  );
+    $form['configuration']['exchange_cache']['message_broker_producer_exchange_cache_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Name'),
+    '#required' => TRUE,
+    '#default_value' => variable_get('message_broker_producer_exchange_cache_name', 'directCacheExchange'),
+  );
+  $form['configuration']['exchange_cache']['message_broker_producer_exchange_cache_type'] = array(
+    '#type' => 'textfield',
+    '#title' => t('type'),
+    '#required' => TRUE,
+    '#default_value' => variable_get('message_broker_producer_exchange_cache_type', 'direct'),
+  );
+  $form['configuration']['exchange_cache']['message_broker_producer_exchange_cache_passive'] = array(
+    '#type' => 'textfield',
+    '#title' => t('passive'),
+    '#required' => TRUE,
+    '#default_value' => variable_get('message_broker_producer_exchange_cache_passive', '0'),
+  );
+  $form['configuration']['exchange_cache']['message_broker_producer_exchange_cache_durable'] = array(
+    '#type' => 'textfield',
+    '#title' => t('durable'),
+    '#required' => TRUE,
+    '#default_value' => variable_get('message_broker_producer_exchange_cache_durable', '1'),
+  );
+  $form['configuration']['exchange_cache']['message_broker_producer_exchange_cache_auto_delete'] = array(
+    '#type' => 'textfield',
+    '#title' => t('auto_delete'),
+    '#required' => TRUE,
+    '#default_value' => variable_get('message_broker_producer_exchange_cache_auto_delete', '0'),
+  );
+
+  $form['configuration']['queue_cache'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Queues')
+  );
+  $form['configuration']['queue_cache']['campaign_cache_queue'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Campaign Cache Queue')
+  );
+  $form['configuration']['queue_cache']['campaign_cache_queue']['message_broker_producer_queue_campaign_cache_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('name'),
+    '#required' => TRUE,
+    '#default_value' => variable_get('message_broker_producer_queue_campaign_cache_name', 'campaignCacheQueue'),
+  );
+  $form['configuration']['queue_cache']['campaign_cache_queue']['message_broker_producer_queue_campaign_cache_passive'] = array(
+    '#type' => 'textfield',
+    '#title' => t('passive'),
+    '#required' => TRUE,
+    '#default_value' => variable_get('message_broker_producer_queue_campaign_cache_passive', '0'),
+  );
+  $form['configuration']['queue_cache']['campaign_cache_queue']['message_broker_producer_queue_campaign_cache_durable'] = array(
+    '#type' => 'textfield',
+    '#title' => t('durable'),
+    '#required' => TRUE,
+    '#default_value' => variable_get('message_broker_producer_queue_campaign_cache_durable', '1'),
+  );
+  $form['configuration']['queue_cache']['campaign_cache_queue']['message_broker_producer_queue_campaign_cache_exclusive'] = array(
+    '#type' => 'textfield',
+    '#title' => t('exclusive'),
+    '#required' => TRUE,
+    '#default_value' => variable_get('message_broker_producer_queue_campaign_cache_exclusive', '0'),
+  );
+  $form['configuration']['queue_cache']['campaign_cache_queue']['message_broker_producer_queue_campaign_cache_auto_delete'] = array(
+    '#type' => 'textfield',
+    '#title' => t('auto_delete'),
+    '#required' => TRUE,
+    '#default_value' => variable_get('message_broker_producer_queue_campaign_cache_auto_delete', '0'),
+  );
+  $form['configuration']['queue_cache']['campaign_cache_queue']['message_broker_producer_queue_registrations_binding_key'] = array(
+    '#type' => 'textfield',
+    '#title' => t('bindingKey'),
+    '#required' => TRUE,
+    '#default_value' => variable_get('message_broker_producer_queue_campaign_cache_binding_key', 'campaignCache'),
   );
 
   return system_settings_form($form);
@@ -343,7 +423,7 @@ function message_broker_producer_status() {
     $status['bindings'] = 'Bindings Listing - No RabbitMQ bindings found, check that RabbitMQ is running.';
   }
 
-  // Test link to produce tranactionals queue entry
+  // Test link to produce transactionals queue entry
   $test_links['all'] = 'Generate ' . l('test producer entry', 'admin/config/services/message-broker-producer/test') . '.';
 
   $test_links['campaign-signup'] = 'Generate ' . l('test campaign_signup producer entry', 'admin/config/services/message-broker-producer/test/campaign_signup') . '.';
