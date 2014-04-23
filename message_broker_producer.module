@@ -104,7 +104,7 @@ function message_broker_producer_request($productionType = '', $param = array())
 
   $library = libraries_load('messagebroker-phplib');
   if (!empty($library['loaded'])) {
-    if (!empty($method)) {
+    if (!empty($productionType)) {
 
       // Add 'activity_timestamp' and 'application_id' to all $param
       $param['activity_timestamp'] = time();

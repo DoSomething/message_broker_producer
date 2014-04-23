@@ -96,7 +96,7 @@ function message_broker_producer_config_form($form, &$form_state) {
   );
   $form['configuration']['queues']['user_registration_queue'] = array(
     '#type' => 'fieldset',
-    '#title' => t('user Registration Queue')
+    '#title' => t('User Registration Queue')
   );
   $form['configuration']['queues']['user_registration_queue']['message_broker_producer_queue_registrations_name'] = array(
     '#type' => 'textfield',
@@ -137,7 +137,7 @@ function message_broker_producer_config_form($form, &$form_state) {
 
   $form['configuration']['queues']['mailchimp_campaign_signup_queue'] = array(
     '#type' => 'fieldset',
-    '#title' => t('mailchimp Campaign Signup Queue')
+    '#title' => t('Mailchimp Campaign Signup Queue')
   );
   $form['configuration']['queues']['mailchimp_campaign_signup_queue']['message_broker_producer_queue_campaign_signups_name'] = array(
     '#type' => 'textfield',
@@ -178,7 +178,7 @@ function message_broker_producer_config_form($form, &$form_state) {
 
   $form['configuration']['queues']['transactional_queue'] = array(
     '#type' => 'fieldset',
-    '#title' => t('transactional Queue')
+    '#title' => t('Transactional Queue')
   );
   $form['configuration']['queues']['transactional_queue']['message_broker_producer_queue_transactional_name'] = array(
     '#type' => 'textfield',
@@ -219,7 +219,7 @@ function message_broker_producer_config_form($form, &$form_state) {
 
   $form['configuration']['queues']['user_API_registration_queue'] = array(
     '#type' => 'fieldset',
-    '#title' => t('user API Registration Queue')
+    '#title' => t('User API Registration Queue')
   );
   $form['configuration']['queues']['user_API_registration_queue']['message_broker_producer_queue_user_API_registration_name'] = array(
     '#type' => 'textfield',
@@ -260,7 +260,7 @@ function message_broker_producer_config_form($form, &$form_state) {
 
   $form['configuration']['queues']['user_API_campaign_activity_queue'] = array(
     '#type' => 'fieldset',
-    '#title' => t('user API Campaign Activity')
+    '#title' => t('User API Campaign Activity')
   );
   $form['configuration']['queues']['user_API_campaign_activity_queue']['message_broker_producer_queue_user_API_campaign_activity_name'] = array(
     '#type' => 'textfield',
