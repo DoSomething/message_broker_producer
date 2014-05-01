@@ -255,7 +255,7 @@ function message_broker_producer_config_form($form, &$form_state) {
     '#type' => 'textfield',
     '#title' => t('bindingKey'),
     '#required' => TRUE,
-    '#default_value' => variable_get('message_broker_producer_queue_user_API_registration_binding_key', 'user.registration.*'),
+    '#default_value' => variable_get('message_broker_producer_queue_user_API_registration_binding_key', 'user.registration.#'),
   );
 
   $form['configuration']['queues']['user_API_campaign_activity_queue'] = array(
