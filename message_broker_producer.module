@@ -191,7 +191,7 @@ function message_broker_producer_request($productionType = '', $param = array())
               'durable' => variable_get('message_broker_producer_queue_user_API_registration_durable', 1),
               'exclusive' => variable_get('message_broker_producer_queue_user_API_registration_exclusive', 0),
               'auto_delete' => variable_get('message_broker_producer_queue_user_API_registration_auto_delete', 0),
-              'bindingKey' => variable_get('message_broker_producer_queue_user_API_registration_binding_key', 'user.registration.*'),
+              'bindingKey' => variable_get('message_broker_producer_queue_user_API_registration_binding_key', 'user.registration.#'),
             ),
             'userAPICampaignActivity' => array(
               'name' => variable_get('message_broker_producer_queue_user_API_campaign_activity_name', 'userAPICampaignActivityQueue'),
