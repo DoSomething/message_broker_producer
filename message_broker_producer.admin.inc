@@ -372,7 +372,7 @@ function message_broker_producer_config_form($form, &$form_state) {
     '#required' => TRUE,
     '#default_value' => variable_get('message_broker_producer_queue_campaign_cache_auto_delete', '0'),
   );
-  $form['configuration']['queue_cache']['campaign_cache_queue']['message_broker_producer_queue_registrations_binding_key'] = array(
+  $form['configuration']['queue_cache']['campaign_cache_queue']['message_broker_producer_queue_campaign_cache_binding_key'] = array(
     '#type' => 'textfield',
     '#title' => t('bindingKey'),
     '#required' => TRUE,
