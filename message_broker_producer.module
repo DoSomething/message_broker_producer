@@ -131,19 +131,16 @@ function message_broker_producer_request($productionType = '', $param = array())
         // Determine routingKey based on activity define in $param
         switch ($param['activity']) {
             case 'campaign_signup':
-            case 'campaign-signup':
+            case 'campaign_group_signup':
               $routing_key = 'campaign.signup.transactional';
               break;
             case 'campaign_reportback':
-            case 'campaign-reportback':
               $routing_key = 'campaign.campaign_reportback.transactional';
               break;
             case 'user_password':
-            case 'user-password':
               $routing_key = 'user.password_reset.transactional';
               break;
             case 'user_register':
-            case 'user-register':
               $routing_key = 'user.registration.transactional';
               break;
 
