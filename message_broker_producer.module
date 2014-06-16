@@ -197,7 +197,15 @@ function message_broker_producer_request($productionType = '', $param = array())
               'exclusive' => variable_get('message_broker_producer_queue_user_API_campaign_activity_exclusive', 0),
               'auto_delete' => variable_get('message_broker_producer_queue_user_API_campaign_activity_auto_delete', 0),
               'bindingKey' => variable_get('message_broker_producer_queue_user_API_campaign_activity_binding_key', 'campaign.*.*'),
-            )
+            ),
+            'activityStats' => array(
+              'name' => variable_get('message_broker_producer_queue_activity_stats_name', 'activityStatsQueue'),
+              'passive' => variable_get('message_broker_producer_queue_activity_stats_passive', 0),
+              'durable' => variable_get('message_broker_producer_queue_activity_stats_durable', 0),
+              'exclusive' => variable_get('message_broker_producer_queue_activity_stats_exclusive', 1),
+              'auto_delete' => variable_get('message_broker_producer_queue_activity_stats_auto_delete', 0),
+              'bindingKey' => variable_get('message_broker_producer_queue_activity_stats_binding_key', '*.*.transactional'),
+            ),
           ),
           'routingKey' => $routing_key,
         );
