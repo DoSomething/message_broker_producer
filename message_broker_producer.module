@@ -247,7 +247,7 @@ function message_broker_producer_request($productionType = '', $param = array())
         return;
       }
       catch (Exception $e) {
-        drupal_set_message('Failed to create MessageBroker library (messagebroker-phplib) instance. Check configuration settings in ' . l('administration interface', '/admin/config/services/message-broker-producer/mq-settings') . '.', 'error');
+        drupal_set_message('Failed to create MessageBroker library (messagebroker-phplib) instance. Check configuration settings in ' . l('administration interface', 'admin/config/services/message-broker-producer/mq-settings') . '.', 'error');
       }
 
     }
