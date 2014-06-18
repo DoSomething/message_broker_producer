@@ -201,7 +201,7 @@ function message_broker_producer_request($productionType = '', $param = array())
             'activityStats' => array(
               'name' => variable_get('message_broker_producer_queue_activity_stats_name', 'activityStatsQueue'),
               'passive' => variable_get('message_broker_producer_queue_activity_stats_passive', 0),
-              'durable' => variable_get('message_broker_producer_queue_activity_stats_durable', 0),
+              'durable' => variable_get('message_broker_producer_queue_activity_stats_durable', 1),
               'exclusive' => variable_get('message_broker_producer_queue_activity_stats_exclusive', 1),
               'auto_delete' => variable_get('message_broker_producer_queue_activity_stats_auto_delete', 0),
               'bindingKey' => variable_get('message_broker_producer_queue_activity_stats_binding_key', '*.*.transactional'),

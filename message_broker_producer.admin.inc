@@ -299,6 +299,47 @@ function message_broker_producer_config_form($form, &$form_state) {
     '#default_value' => variable_get('message_broker_producer_queue_user_API_campaign_activity_binding_key', 'campaign.*.*'),
   );
 
+  $form['configuration']['queues']['activity_stats_queue'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Activity Stats')
+  );
+  $form['configuration']['queues']['activity_stats_queue']['message_broker_producer_queue_activity_stats_queue_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('name'),
+    '#required' => TRUE,
+    '#default_value' => variable_get('message_broker_producer_queue_activity_stats_name', 'activityStatsQueue'),
+  );
+  $form['configuration']['queues']['activity_stats_queue']['message_broker_producer_queue_activity_stats_passive'] = array(
+    '#type' => 'textfield',
+    '#title' => t('passive'),
+    '#required' => TRUE,
+    '#default_value' => variable_get('message_broker_producer_queue_activity_stats_passive', '0'),
+  );
+  $form['configuration']['queues']['activity_stats_queue']['message_broker_producer_queue_activity_stats_durable'] = array(
+    '#type' => 'textfield',
+    '#title' => t('durable'),
+    '#required' => TRUE,
+    '#default_value' => variable_get('message_broker_producer_queue_activity_stats_durable', '1'),
+  );
+  $form['configuration']['queues']['activity_stats_queue']['message_broker_producer_queue_activity_stats_exclusive'] = array(
+    '#type' => 'textfield',
+    '#title' => t('exclusive'),
+    '#required' => TRUE,
+    '#default_value' => variable_get('message_broker_producer_queue_activity_stats_exclusive', '0'),
+  );
+  $form['configuration']['queues']['activity_stats_queue']['message_broker_producer_queue_activity_stats_auto_delete'] = array(
+    '#type' => 'textfield',
+    '#title' => t('auto_delete'),
+    '#required' => TRUE,
+    '#default_value' => variable_get('message_broker_producer_queue_activity_stats_auto_delete', '0'),
+  );
+  $form['configuration']['queues']['activity_stats_queue']['message_broker_producer_queue_activity_stats_binding_key'] = array(
+    '#type' => 'textfield',
+    '#title' => t('bindingKey'),
+    '#required' => TRUE,
+    '#default_value' => variable_get('message_broker_producer_queue_activity_stats_binding_key', '*.*.transactional'),
+  );
+
   $form['configuration']['exchange_cache'] = array(
     '#type' => 'fieldset',
     '#title' => t('Cache Exchange')
