@@ -206,6 +206,14 @@ function message_broker_producer_request($productionType = '', $param = array())
               'auto_delete' => variable_get('message_broker_producer_queue_activity_stats_auto_delete', 0),
               'bindingKey' => variable_get('message_broker_producer_queue_activity_stats_binding_key', '*.*.transactional'),
             ),
+            'logging' => array(
+              'name' => variable_get('message_broker_producer_queue_logging_name', 'loggingQueue'),
+              'passive' => variable_get('message_broker_producer_queue_logging_passive', 0),
+              'durable' => variable_get('message_broker_producer_queue_logging_durable', 1),
+              'exclusive' => variable_get('message_broker_producer_queue_logging_exclusive', 1),
+              'auto_delete' => variable_get('message_broker_producer_queue_logging_auto_delete', 0),
+              'bindingKey' => variable_get('message_broker_producer_queue_logging_binding_key', '*.*.transactional'),
+            ),
           ),
           'routingKey' => $routing_key,
         );
