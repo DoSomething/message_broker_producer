@@ -340,6 +340,47 @@ function message_broker_producer_config_form($form, &$form_state) {
     '#default_value' => variable_get('message_broker_producer_queue_activity_stats_binding_key', '*.*.transactional'),
   );
 
+  $form['configuration']['queues']['logging_queue'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Activity Stats')
+  );
+  $form['configuration']['queues']['logging_queue']['message_broker_producer_queue_logging_queue_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('name'),
+    '#required' => TRUE,
+    '#default_value' => variable_get('message_broker_producer_queue_logging_name', 'loggingQueue'),
+  );
+  $form['configuration']['queues']['logging_queue']['message_broker_producer_queue_logging_passive'] = array(
+    '#type' => 'textfield',
+    '#title' => t('passive'),
+    '#required' => TRUE,
+    '#default_value' => variable_get('message_broker_producer_queue_logging_passive', '0'),
+  );
+  $form['configuration']['queues']['logging_queue']['message_broker_producer_queue_logging_durable'] = array(
+    '#type' => 'textfield',
+    '#title' => t('durable'),
+    '#required' => TRUE,
+    '#default_value' => variable_get('message_broker_producer_queue_logging_durable', '1'),
+  );
+  $form['configuration']['queues']['logging_queue']['message_broker_producer_queue_logging_exclusive'] = array(
+    '#type' => 'textfield',
+    '#title' => t('exclusive'),
+    '#required' => TRUE,
+    '#default_value' => variable_get('message_broker_producer_queue_logging_exclusive', '0'),
+  );
+  $form['configuration']['queues']['logging_queue']['message_broker_producer_queue_logging_auto_delete'] = array(
+    '#type' => 'textfield',
+    '#title' => t('auto_delete'),
+    '#required' => TRUE,
+    '#default_value' => variable_get('message_broker_producer_queue_logging_auto_delete', '0'),
+  );
+  $form['configuration']['queues']['logging_queue']['message_broker_producer_queue_logging_binding_key'] = array(
+    '#type' => 'textfield',
+    '#title' => t('bindingKey'),
+    '#required' => TRUE,
+    '#default_value' => variable_get('message_broker_producer_queue_logging_binding_key', '*.*.transactional'),
+  );
+  
   $form['configuration']['exchange_cache'] = array(
     '#type' => 'fieldset',
     '#title' => t('Cache Exchange')
