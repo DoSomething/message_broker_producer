@@ -31,4 +31,24 @@ function message_broker_producer_requirements($phase) {
   return $requirements;
 }
 
+ /**
+ * Deletes exchange_cache and queue_cache system variables
+ */
+function message_broker_producer_update_7001(&$sandbox) {
 
+  // Exchange
+  variable_del('message_broker_producer_exchange_cache_name');
+  variable_del('message_broker_producer_exchange_cache_type');
+  variable_del('message_broker_producer_exchange_cache_passive');
+  variable_del('message_broker_producer_exchange_cache_durable');
+  variable_del('message_broker_producer_exchange_cache_auto_delete');
+
+  // Queue
+  variable_del('message_broker_producer_queue_campaign_cache_name');
+  variable_del('message_broker_producer_queue_campaign_cache_passive');
+  variable_del('message_broker_producer_queue_campaign_cache_durable');
+  variable_del('message_broker_producer_queue_campaign_cache_exclusive');
+  variable_del('message_broker_producer_queue_campaign_cache_auto_delete');
+  variable_del('message_broker_producer_queue_campaign_cache_binding_key');
+
+}
