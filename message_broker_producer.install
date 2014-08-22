@@ -50,5 +50,7 @@ function message_broker_producer_update_7001(&$sandbox) {
   variable_del('message_broker_producer_queue_campaign_cache_exclusive');
   variable_del('message_broker_producer_queue_campaign_cache_auto_delete');
   variable_del('message_broker_producer_queue_campaign_cache_binding_key');
+  
+  variable_del('message_broker_producer_queue_campaign_cache_routing_key');
 
 }
