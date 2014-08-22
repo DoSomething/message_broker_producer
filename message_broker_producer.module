@@ -219,30 +219,6 @@ function message_broker_producer_request($productionType = '', $param = array())
         );
 
       }
-      elseif ($productionType == 'produceCampaignCache') {
-
-        $config = array(
-          'exchange' => array(
-            'name' => variable_get('message_broker_producer_exchange_cache_name', 'directCacheExchange'),
-            'type' => variable_get('message_broker_producer_exchange_cache_type', 'direct'),
-            'passive' => variable_get('message_broker_producer_exchange_cache_passive', 0),
-            'durable' => variable_get('message_broker_producer_exchange_cache_durable', 1),
-            'auto_delete' => variable_get('message_broker_producer_exchange_cache_auto_delete', 0),
-          ),
-          'queue' => array(
-            'campaignCache' => array(
-              'name' => variable_get('message_broker_producer_queue_campaign_cache_name', 'campaignCacheQueue'),
-              'passive' => variable_get('message_broker_producer_queue_campaign_cache_passive', 0),
-              'durable' => variable_get('message_broker_producer_queue_campaign_cache_durable', 1),
-              'exclusive' => variable_get('message_broker_producer_queue_campaign_cache_exclusive', 0),
-              'auto_delete' => variable_get('message_broker_producer_queue_campaign_cache_auto_delete', 0),
-              'bindingKey' => variable_get('message_broker_producer_queue_campaign_cache_binding_key', 'campaignCache'),
-            ),
-          ),
-          'routingKey' => variable_get('message_broker_producer_queue_campaign_cache_routing_key', 'campaignCache'),
-        );
-
-      }
       else {
         drupal_set_message('Unsupported method "' . $method . '" sent to  message_broker_producer_request()', 'error');
         return;

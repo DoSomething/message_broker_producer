@@ -342,7 +342,7 @@ function message_broker_producer_config_form($form, &$form_state) {
 
   $form['configuration']['queues']['logging_queue'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Activity Stats')
+    '#title' => t('Logging')
   );
   $form['configuration']['queues']['logging_queue']['message_broker_producer_queue_logging_queue_name'] = array(
     '#type' => 'textfield',
