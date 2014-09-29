@@ -6,6 +6,10 @@
 
 /**
  * Implements hook_libraries_info().
+ *
+ * Note: The messagebroker-config entry is to allow access to the
+ * mb_config.json JSON file. While not a Javascript file the use of
+ * the library functionality provides path details.
  */
 function message_broker_producer_libraries_info() {
 
