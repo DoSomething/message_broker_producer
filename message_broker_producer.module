@@ -9,25 +9,14 @@
  */
 function message_broker_producer_libraries_info() {
 
-  $libraries = array(
-    'messagebroker-phplib' => array(
-      'name' => 'Message Broker PHP Library',
-      'vendor url' => 'https://github.com/DoSomething/messagebroker-phplib',
-      'download url' => 'https://github.com/DoSomething/messagebroker-phplib',
-      'version' => '1.0',
-      'files' => array(
-        'php' => array('MessageBroker-Drupal.php'),
-      ),
+  $libraries['messagebroker-phplib'] = array(
+    'name' => 'Message Broker PHP Library',
+    'vendor url' => 'https://github.com/DoSomething/messagebroker-phplib',
+    'download url' => 'https://github.com/DoSomething/messagebroker-phplib',
+    'version' => '1.0',
+    'files' => array(
+      'php' => array('MessageBroker-Drupal.php'),
     ),
-    'messagebroker-config' => array(
-      'name' => 'Message Broker Config',
-      'vendor url' => 'https://github.com/DoSomething/messagebroker-config',
-      'download url' => 'https://github.com/DoSomething/messagebroker-config',
-      'version' => '1.0',
-      'files' => array(
-        'js' => array('mb_config.json'),
-      ),
-    )
   );
 
   return $libraries;
