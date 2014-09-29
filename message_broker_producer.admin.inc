@@ -10,8 +10,6 @@
  */
 function message_broker_producer_config_form($form, &$form_state) {
 
-  $mb_config_settings = $message_broker_producer_load_config_options();
-
   $form['authentication'] = array(
     '#type' => 'fieldset',
     '#title' => t('RabbitMQ Authentication')
@@ -439,17 +437,4 @@ function message_broker_producer_status() {
   $test_links['campaign-reportback-noname'] = 'Generate ' . l('test campaign_reportback_noname producer entry', 'admin/config/services/message-broker-producer/test/campaign_reportback_noname') . '.';
   
   return theme('message_broker_producer_status', array('status' => $status, 'test_links' => $test_links));
-}
-
-/**
- * Load mb_config.json from library and format as PHP object.
- */
-function message_broker_producer_load_config_options() {
-
-  $mb_config_library = libraries_load('messagebroker-config');
-  $mb_config_path = $GLOBALS['base_url'] . '/' . $mb_config_library['library path'] . '/mb_config.json';
-  $mb_config_json = file_get_contents($mb_config_path);
-  $mb_config_settings = json_decode($mb_config_json);
-
-  return $mb_config_settings;
 }
