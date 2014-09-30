@@ -7,6 +7,53 @@
  */
 
 /**
+ * Implements hook_schema().
+ *
+ * List of "production" entries that consist of exchange and related queue
+ * entries / settings to be used when generating Message Broker messages.
+ */
+function message_broker_producer_schema() {
+
+  $schema['message_broker_producer'] = array(
+    'description' => 'Message Broker Producer production entries. Configuration entries in this table are based on setting found in the mb_config.json file.',
+    'fields' => array(
+      'machine_name' => array(
+        'description' => 'The unique machine friendly production name to be referenced to access specific entries.',
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'config' => array(
+        'description' => 'Serialized array of exchanges and related queues to be included in the payload sent in the production request.',
+        'type' => 'text',
+        'size' => 'normal',
+        'not null' => TRUE,
+      ),
+      'status' => array(
+        'description' => 'A flag to indicate if the entry can be used.',
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'last_updated' => array(
+        'description' => 'A timestamp of the last update to the entry based on mb_config.json.',
+        'type' => 'int',
+        'size' => 'normal',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('machine_name'),
+  );
+
+  return $schema;
+
+}
+
+/**
  * Implements hook_requirements().
  */
 function message_broker_producer_requirements($phase) {
@@ -14,7 +61,8 @@ function message_broker_producer_requirements($phase) {
 
   if ($phase == 'runtime') {
 
-    $library = libraries_detect('messagebroker-phplib');
+    $phplib_library = libraries_detect('messagebroker-phplib');
+    $config_library = libraries_detect('messagebroker-config');
 
     if (empty($library['installed'])) {
       $requirements['messagebroker-phplib'] = array(
@@ -29,6 +77,43 @@ function message_broker_producer_requirements($phase) {
     }
   }
   return $requirements;
+}
+
+/**
+ * Implements hook_uninstall().
+ *
+ * Clean up / remove all data created by the module.
+ */
+function message_broker_producer_uninstall() {
+
+  // Remove all optimizely settings in the variable table
+  $cleanup_status = (bool) db_delete('variable')
+    ->condition('name', '%message_broker_producer_%', 'LIKE')
+    ->execute();
+
+  if ($cleanup_status == TRUE) {
+    drupal_set_message(st('Message Broker Producer variables deleted.'), 'status');
+  }
+  else {
+    drupal_set_message(st('No entries found when deleting Message Broker Producer variables.'), 'warning');
+  }
+
+  // hook_uninstall removes schema automatically
+  drupal_set_message(st('Message Broker Producer database table dropped.'), 'status');
+
+}
+
+/**
+ * User enabled module
+ */
+function message_broker_producer_enable() {
+
+
+    drupal_set_message(st('The Message Broker Producer module has been enabled. Adminster the production entries that are referenced in message_broker_producer(<production_name>) in ') .
+        ' ' . l(st('Account Settings'), 'admin/config/services/message-broker-producer/production-options') . '.',
+      'status');
+
+
 }
 
  /**
