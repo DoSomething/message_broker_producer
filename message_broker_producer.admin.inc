@@ -407,25 +407,50 @@ function message_broker_producer_status() {
    * works
    * $directoryListing = shell_exec('ls -la /usr/local/sbin');
    */
-  $queues = shell_exec('/usr/local/sbin/rabbitmqctl list_queues');
-  if ($queues == NULL) {
-    $status['queues'] = 'Queue Listing - No RabbitMQ queues found, check that RabbitMQ is running.';
-  }
-  else {
-    $status['queues'] = print_r($queues, TRUE);
-  }
+  
+  // RabbitMQ Managment API
+  // http://hg.rabbitmq.com/rabbitmq-management/raw-file/rabbitmq_v3_3_5/priv/www/api/index.html
+  
+  // Control returned results
+  // curl -i -u guest:guest 'http://localhost:15672/api/channels?sort=message_stats.publish_details.rate&sort_reverse=true&columns=name,message_stats.publish_details.rate,message_stats.deliver_get_details.rate'
+  
+  // /api/overview
+  // Various random bits of information that describe the whole system.
+  
+  // List vhosts
+  // curl -i -u guest:guest http://localhost:15672/api/vhosts
+  
+  // List general Rabbit Healthcheck
+  // /api/aliveness-test/vhost
+  $rabbit_management_api_url = getenv('MB_RABBIT_MANAGEMENT_API_HOST') .':' . getenv('MB_RABBIT_MANAGEMENT_API_PORT')  . '/api/aliveness-test/' . $vhost;
 
+  // @todo: Add admin cradentials
+  // curl -i -u guest:guest http://localhost:15672/api/vhosts
+  $ch = curl_init();
+  curl_setopt($ch, CURLOPT_URL, $rabbit_management_api_url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+  curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+    'Content-type: application/json',
+    'Accept: application/json'
+  ));
+  $jsonResult = curl_exec($ch);
+  $result = json_decode($jsonResult);
+      
+  // List Queues
+  // /api/queues/vhost
+  // A list of all queues in a given virtual host.
+  
   // List exchanges
-  $exchanges = shell_exec('/usr/local/sbin/rabbitmqctl list_exchanges');
-  if ($exchanges == NULL) {
-    $status['exchanges'] = 'Exchange Listing - No RabbitMQ exchanges found, check that RabbitMQ is running.';
-  }
-
+  // /api/exchanges/vhost
+  // A list of all exchanges in a given virtual host.
+  
   // List bindings
-  $bindings = shell_exec('rabbitmqctl list_exchanges');
-  if ($bindings == NULL) {
-    $status['bindings'] = 'Bindings Listing - No RabbitMQ bindings found, check that RabbitMQ is running.';
-  }
+  // /api/bindings/vhost/e/exchange/q/queue
+  // A list of all bindings between an exchange and a queue. Remember, an exchange and a queue can be bound together many times!
+  
+  // /api/bindings/vhost/e/exchange/q/queue/props
+  // An individual binding between an exchange and a queue. The props part of the URI is a "name" for the binding composed of
+  // its routing key and a hash of its arguments.
 
   // Test link to produce transactionals queue entry
   $test_links['all'] = 'Generate ' . l('test producer entry', 'admin/config/services/message-broker-producer/test') . '.';
