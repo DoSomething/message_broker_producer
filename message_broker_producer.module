@@ -75,7 +75,7 @@ function message_broker_producer_menu() {
   );
   $items['admin/config/services/message-broker-producer/production-options'] = array(
     'title' => 'Production Options',
-    'description' => 'List of all different projects to put Optimizely code snippet.',
+    'description' => 'List of production items and their related settings.',
     'type' => MENU_LOCAL_TASK,
     'page callback' => 'drupal_get_form',
     'page arguments' => array('message_broker_producer_production_options_form'),
