@@ -37,7 +37,7 @@ function message_broker_producer_schema() {
         'not null' => TRUE,
         'default' => 0,
       ),
-      'last_updated' => array(
+      'updated' => array(
         'description' => 'A timestamp of the last update to the entry based on mb_config.json.',
         'type' => 'int',
         'size' => 'normal',
