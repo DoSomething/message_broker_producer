@@ -12,7 +12,6 @@
  * List of "production" entries that consist of exchange and related queue
  * entries / settings to be used when generating Message Broker messages.
  */
- /*
 function message_broker_producer_schema() {
 
   $schema['message_broker_producer'] = array(
@@ -60,7 +59,6 @@ function message_broker_producer_schema() {
   return $schema;
 
 }
-*/
 
 /**
  * Implements hook_requirements().
