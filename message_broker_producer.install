@@ -12,6 +12,7 @@
  * List of "production" entries that consist of exchange and related queue
  * entries / settings to be used when generating Message Broker messages.
  */
+ /*
 function message_broker_producer_schema() {
 
   $schema['message_broker_producer'] = array(
@@ -59,6 +60,7 @@ function message_broker_producer_schema() {
   return $schema;
 
 }
+*/
 
 /**
  * Implements hook_requirements().
@@ -111,6 +113,9 @@ function message_broker_producer_uninstall() {
 }
 
 /**
+ *
+ * Implements hook_enable().
+ *
  * User enabled module
  */
 function message_broker_producer_enable() {
@@ -121,7 +126,10 @@ function message_broker_producer_enable() {
       'status');
 }
 
- /**
+/**
+ *
+ * Implements hook_update_xx().
+ *
  * Deletes exchange_cache and queue_cache system variables
  */
 function message_broker_producer_update_7001(&$sandbox) {
@@ -146,6 +154,9 @@ function message_broker_producer_update_7001(&$sandbox) {
 }
 
 /**
+ *
+ * Implements hook_update_xx().
+ *
  * Delete all system variables related to the previous version
  */
 function message_broker_producer_update_7002(&$sandbox) {
@@ -205,5 +216,5 @@ function message_broker_producer_update_7002(&$sandbox) {
     'primary key' => array('machine_name'),
   );
 
-  db_create_table)($schema, 'message_broker_producer');
+  db_create_table('message_broker_producer', $schema['message_broker_producer']);
 }
