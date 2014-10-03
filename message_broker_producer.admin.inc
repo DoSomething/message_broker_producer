@@ -80,35 +80,49 @@ function message_broker_producer_status() {
    * works
    * $directoryListing = shell_exec('ls -la /usr/local/sbin');
    */
-  
+
   // RabbitMQ Managment API
   // http://hg.rabbitmq.com/rabbitmq-management/raw-file/rabbitmq_v3_3_5/priv/www/api/index.html
-  
+
+  // curl -i -u dosomething:Kickba11 http://10.241.0.14:15672/api/aliveness-test/dosomething
+
+  http://dosomething:Kickba11@10.241.0.14:55672/api/aliveness-test/%2F
+
   // Control returned results
   // curl -i -u guest:guest 'http://localhost:15672/api/channels?sort=message_stats.publish_details.rate&sort_reverse=true&columns=name,message_stats.publish_details.rate,message_stats.deliver_get_details.rate'
-  
+
   // /api/overview
   // Various random bits of information that describe the whole system.
-  
+
   // List vhosts
   // curl -i -u guest:guest http://localhost:15672/api/vhosts
-  
+
   // List general Rabbit Healthcheck
   // /api/aliveness-test/vhost
-  $rabbit_management_api_url = getenv('MB_RABBIT_MANAGEMENT_API_HOST') .':' . getenv('MB_RABBIT_MANAGEMENT_API_PORT')  . '/api/aliveness-test/' . $vhost;
+  $rabbit_management_api_url = variable_get('message_broker_producer_rabbitmq_host', 'localhost') .':15672/api/aliveness-test/' . variable_get('message_broker_producer_rabbitmq_vhost', '%2F');
+  $rabbit_username = variable_get('message_broker_producer_rabbitmq_username', 'guest');
+  $rabbit_password = variable_get('message_broker_producer_rabbitmq_password', 'guest');
+
+  echo('rabbit_management_api_url: '. $rabbit_management_api_url . '<br />');
 
   // @todo: Add admin cradentials
   // curl -i -u guest:guest http://localhost:15672/api/vhosts
   $ch = curl_init();
   curl_setopt($ch, CURLOPT_URL, $rabbit_management_api_url);
-  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
   curl_setopt($ch, CURLOPT_HTTPHEADER, array(
     'Content-type: application/json',
     'Accept: application/json'
   ));
+  curl_setopt($ch, CURLOPT_USERPWD, "$rabbit_username:$rabbit_password");
+  curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
   $jsonResult = curl_exec($ch);
-  $result = json_decode($jsonResult);
-      
+  $results = json_decode($jsonResult);
+
+  echo('<pre>');
+  print_r($results);
+  echo('</pre>');
+
   // List Queues
   // /api/queues/vhost
   // A list of all queues in a given virtual host.
