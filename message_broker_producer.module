@@ -36,7 +36,7 @@ function message_broker_producer_libraries_info() {
 }
 
 /**
- * Implements hook_theme()
+ * Implements hook_theme().
  */
 function message_broker_producer_theme($existing, $type, $theme, $path) {
   return array(
@@ -52,7 +52,7 @@ function message_broker_producer_theme($existing, $type, $theme, $path) {
  */
 function message_broker_producer_menu() {
 
-   $items['admin/config/services/message-broker-producer'] = array(
+  $items['admin/config/services/message-broker-producer'] = array(
     'title' => 'Message Broker',
     'description' => 'Message Broker resources - RabbitMQ status and settings.',
     'page callback' => 'message_broker_producer_status',
@@ -62,7 +62,7 @@ function message_broker_producer_menu() {
   $items['admin/config/services/message-broker-producer/status'] = array(
     'title' => 'RabbitMQ Status',
     'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -10
+    'weight' => -10,
   );
   $items['admin/config/services/message-broker-producer/mq-settings'] = array(
     'title' => 'RabbitMQ Settings',
@@ -83,7 +83,7 @@ function message_broker_producer_menu() {
     'file' => 'message_broker_producer.admin.inc',
     'file path' => drupal_get_path('module', 'message_broker_producer'),
   );
-  // Testing - remove for release
+  // Testing - remove for release.
   $items['admin/config/services/message-broker-producer/test'] = array(
     'title' => 'Message Broker Test Transaction',
     'description' => 'Send all test transaction types',
@@ -106,21 +106,21 @@ function message_broker_producer_menu() {
  */
 function message_broker_producer_permission() {
   return array(
-    'administer message_broker_producer' =>  array(
+    'administer message_broker_producer' => array(
       'title' => t('Administer Message Broker Producer'),
       'description' => t('Manage Message Broker Producer settings.'),
-    )
+    ),
   );
 }
 
 /**
  * Makes request to Message Broker PHP Library and RabbitMQ.
  *
- * @param $productionType
+ * @param string $productionType
  *   A value to define the type of production. Currently supports
  *   produceTransactional and produceCampaignCache producer activities.
  *
- * @param $params
+ * @param array $param
  *   An option associative array of parameters.
  */
 function message_broker_producer_request($productionType = '', $param = array()) {
@@ -129,7 +129,7 @@ function message_broker_producer_request($productionType = '', $param = array())
   if (!empty($library['loaded'])) {
     if (!empty($productionType)) {
 
-      // Add 'activity_timestamp' and 'application_id' to all $param
+      // Add 'activity_timestamp' and 'application_id' to all $param.
       $param['activity_timestamp'] = time();
       $application_id = variable_get('message_broker_producer_application_id', NULL);
       if (!empty($application_id) && $application_id != -1) {
@@ -148,28 +148,31 @@ function message_broker_producer_request($productionType = '', $param = array())
         'vhost' => variable_get('message_broker_producer_rabbitmq_vhost', ''),
       );
 
-      // Supported methods - produceTransactional, cacheCampaign
+      // Supported methods - produceTransactional, cacheCampaign.
       if ($productionType == 'produceTransactional') {
 
-        // Determine routingKey based on activity define in $param
+        // Determine routingKey based on activity define in $param.
         switch ($param['activity']) {
-            case 'campaign_signup':
-            case 'campaign_group_signup':
-              $routing_key = 'campaign.signup.transactional';
-              break;
-            case 'campaign_reportback':
-              $routing_key = 'campaign.campaign_reportback.transactional';
-              break;
-            case 'user_password':
-              $routing_key = 'user.password_reset.transactional';
-              break;
-            case 'user_register':
-              $routing_key = 'user.registration.transactional';
-              break;
+          case 'campaign_signup':
+          case 'campaign_group_signup':
+            $routing_key = 'campaign.signup.transactional';
+            break;
 
-            default:
-              throw new Exception('Undefined activity "' . $param->activity .
-                '" sent to produceTransactional in messagebroker-phplib.');
+          case 'campaign_reportback':
+            $routing_key = 'campaign.campaign_reportback.transactional';
+            break;
+
+          case 'user_password':
+            $routing_key = 'user.password_reset.transactional';
+            break;
+
+          case 'user_register':
+            $routing_key = 'user.registration.transactional';
+            break;
+
+          default:
+            throw new Exception('Undefined activity "' . $param->activity .
+              '" sent to produceTransactional in messagebroker-phplib.');
         }
 
         $config = array(
@@ -254,7 +257,7 @@ function message_broker_producer_request($productionType = '', $param = array())
         return;
       }
       catch (Exception $e) {
-        drupal_set_message('Failed to create MessageBroker library (messagebroker-phplib) instance. Check configuration settings in ' . l('administration interface', 'admin/config/services/message-broker-producer/mq-settings') . '.', 'error');
+        drupal_set_message('Failed to create MessageBroker library (messagebroker-phplib) instance. Check configuration settings in ' . l(t('administration interface'), 'admin/config/services/message-broker-producer/mq-settings') . '.', 'error');
       }
 
     }
@@ -270,7 +273,7 @@ function message_broker_producer_request($productionType = '', $param = array())
 }
 
 /**
- * Send test produceTransactional entry
+ * Send test produceTransactional entry.
  *
  * This is an example of how a Druapl app can produce a transactional message
  * entry in MessageBroker system. The $payload defines the values passed to the
@@ -280,11 +283,11 @@ function message_broker_producer_request($productionType = '', $param = array())
  * merge_var values are specific to the Mandrill service used by the related
  * consumer to send email messages.
  *
- * @param $action
+ * @param string $action
  *   The type of test action / transaction to submit.
  */
 function message_broker_producer_test($action = NULL) {
-  
+
   if (empty($action) || $action == 'campaign_signup' || $action == 1) {
     $payload = array(
       'activity' => 'campaign_signup',
@@ -310,7 +313,7 @@ function message_broker_producer_test($action = NULL) {
       'uid' => '22229',
       'event_id' => '99992',
       'mailchimp_grouping_id' => '10637',
--     'mailchimp_group_name' => 'PBJamSlam2014',
+      'mailchimp_group_name' => 'PBJamSlam2014',
       'merge_vars' => array(
         'FNAME' => 'First-Name',
         'CAMPAIGN_TITLE' => 'Campaign Title',
@@ -339,7 +342,7 @@ function message_broker_producer_test($action = NULL) {
       'activity' => 'user_register',
       'email' => 'dlee+messagebroker-test-user-register-over' . rand(1, 99) . '@dosomething.org',
       'uid' => '44449',
-      'birthdate' => 929232000, // 13 June 1999 (over 13)
+      'birthdate' => 929232000,  /* 13 June 1999 (over 13) */
       'merge_vars' => array(
         'FNAME' => 'First-Name',
       ),
@@ -351,7 +354,7 @@ function message_broker_producer_test($action = NULL) {
       'activity' => 'user_register',
       'email' => 'dlee+messagebroker-test-user-register-under' . rand(1, 99) . '@dosomething.org',
       'uid' => '44449',
-      'birthdate' => 1087084800, // 13 June 2004 (under 13)
+      'birthdate' => 1087084800,  /* 13 June 2004 (under 13) */
       'merge_vars' => array(
         'FNAME' => 'First-Name',
       ),
@@ -396,16 +399,18 @@ function message_broker_producer_test($action = NULL) {
 }
 
 /**
- * Wrapper function for message_broker_producer_test() as the function can be
+ * Wrapper function for message_broker_producer_test().
+ *
+ * message_broker_producer_test() can be
  * called from both the admin UI as a link and a Drush command.
  *
- * @param $action
+ * @param string $action
  *   The type of test action / transaction to submit.
  */
 function message_broker_producer_test_page($action = NULL) {
-  
+
   message_broker_producer_test($action);
-  
+
   drupal_set_message('Producer ' . $action . ' test sent.', 'status');
   drupal_goto('admin/config/services/message-broker-producer/status');
 }
