@@ -22,6 +22,15 @@ function message_broker_producer_libraries_info() {
       'php' => array('MessageBroker-Drupal.php'),
     ),
   );
+  $libraries['messagebroker-config'] = array(
+    'name' => 'Message Broker Config',
+    'vendor url' => 'https://github.com/DoSomething/messagebroker-config',
+    'download url' => 'https://github.com/DoSomething/messagebroker-config',
+    'version' => '1.0',
+    'files' => array(
+      'js' => array('mb_config.json'),
+    ),
+  );
 
   return $libraries;
 }
@@ -62,8 +71,18 @@ function message_broker_producer_menu() {
     'page arguments' => array('message_broker_producer_config_form'),
     'access arguments' => array('administer message_broker_producer'),
     'file' => 'message_broker_producer.admin.inc',
+    'file path' => drupal_get_path('module', 'message_broker_producer'),
   );
-
+  $items['admin/config/services/message-broker-producer/production-options'] = array(
+    'title' => 'Production Options',
+    'description' => 'List of production items and their related settings.',
+    'type' => MENU_LOCAL_TASK,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('message_broker_producer_production_options_form'),
+    'access arguments' => array('administer message_broker_producer'),
+    'file' => 'message_broker_producer.admin.inc',
+    'file path' => drupal_get_path('module', 'message_broker_producer'),
+  );
   // Testing - remove for release
   $items['admin/config/services/message-broker-producer/test'] = array(
     'title' => 'Message Broker Test Transaction',
