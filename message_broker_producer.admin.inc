@@ -10,8 +10,6 @@
  */
 function message_broker_producer_config_form($form, &$form_state) {
 
-  $mb_config_settings = $message_broker_producer_load_config_options();
-
   $form['authentication'] = array(
     '#type' => 'fieldset',
     '#title' => t('RabbitMQ Authentication')
