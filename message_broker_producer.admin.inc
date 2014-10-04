@@ -66,49 +66,16 @@ function message_broker_producer_status() {
 
   $status = '';
 
-  // List queues
-  /* @todo: permission access issues for www user
-   *
-   * http://unix.stackexchange.com/questions/15264/executing-a-shell-command-from-php-with-shell-exec
-   * Added:
-   * http    ALL=(username) /usr/local/sbin/rabbitmqctl
-   * to /etc/sudoers
-   *
-   * Program Execution in PHP: exec, system, passthru, and shell_exec, oh my!
-   * http://chipmunkninja.com/Program-Execution-in-PHP%3A-exec-m@
-   *
-   * works
-   * $directoryListing = shell_exec('ls -la /usr/local/sbin');
-   */
-
   // RabbitMQ Managment API
   // http://hg.rabbitmq.com/rabbitmq-management/raw-file/rabbitmq_v3_3_5/priv/www/api/index.html
-
-  // curl -i -u dosomething:Kickba11 http://10.241.0.14:15672/api/aliveness-test/dosomething
-
-  http://dosomething:Kickba11@10.241.0.14:55672/api/aliveness-test/%2F
 
   // Control returned results
   // curl -i -u guest:guest 'http://localhost:15672/api/channels?sort=message_stats.publish_details.rate&sort_reverse=true&columns=name,message_stats.publish_details.rate,message_stats.deliver_get_details.rate'
 
-  // /api/overview
-  // Various random bits of information that describe the whole system.
-
-  // List vhosts
-  // curl -i -u guest:guest http://localhost:15672/api/vhosts
-
-  // List general Rabbit Healthcheck
-  // /api/aliveness-test/vhost
-  $rabbit_management_api_url = variable_get('message_broker_producer_rabbitmq_host', 'localhost') .':15672/api/aliveness-test/' . variable_get('message_broker_producer_rabbitmq_vhost', '%2F');
   $rabbit_username = variable_get('message_broker_producer_rabbitmq_username', 'guest');
   $rabbit_password = variable_get('message_broker_producer_rabbitmq_password', 'guest');
 
-  echo('rabbit_management_api_url: '. $rabbit_management_api_url . '<br />');
-
-  // @todo: Add admin cradentials
-  // curl -i -u guest:guest http://localhost:15672/api/vhosts
   $ch = curl_init();
-  curl_setopt($ch, CURLOPT_URL, $rabbit_management_api_url);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
   curl_setopt($ch, CURLOPT_HTTPHEADER, array(
     'Content-type: application/json',
@@ -116,28 +83,24 @@ function message_broker_producer_status() {
   ));
   curl_setopt($ch, CURLOPT_USERPWD, "$rabbit_username:$rabbit_password");
   curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-  $jsonResult = curl_exec($ch);
-  $results = json_decode($jsonResult);
 
-  echo('<pre>');
-  print_r($results);
-  echo('</pre>');
+  $rabbit_management_api_urls = array(
+    'api-aliveness-test' => variable_get('message_broker_producer_rabbitmq_host', 'localhost') .':15672/api/aliveness-test/' . variable_get('message_broker_producer_rabbitmq_vhost', '%2F'),
+    'api-vhosts' => variable_get('message_broker_producer_rabbitmq_host', 'localhost') .':15672/api/vhosts',
+    'api-overview' => variable_get('message_broker_producer_rabbitmq_host', 'localhost') .':15672/api/overview',
+  );
 
-  // List Queues
-  // /api/queues/vhost
-  // A list of all queues in a given virtual host.
-  
-  // List exchanges
-  // /api/exchanges/vhost
-  // A list of all exchanges in a given virtual host.
-  
-  // List bindings
-  // /api/bindings/vhost/e/exchange/q/queue
-  // A list of all bindings between an exchange and a queue. Remember, an exchange and a queue can be bound together many times!
-  
-  // /api/bindings/vhost/e/exchange/q/queue/props
-  // An individual binding between an exchange and a queue. The props part of the URI is a "name" for the binding composed of
-  // its routing key and a hash of its arguments.
+  foreach ($rabbit_management_api_urls as $call => $rabbit_management_api_url) {
+    curl_setopt($ch, CURLOPT_URL, $rabbit_management_api_url);
+    $jsonResult = curl_exec($ch);
+    $results = json_decode($jsonResult);
+
+    echo( $call . ': <pre>');
+    print_r($results);
+    echo('</pre>');
+
+    $status[$call] = $results->status;
+  }
 
   // Test link to produce transactionals queue entry
   $test_links['all'] = 'Generate ' . l('test producer entry', 'admin/config/services/message-broker-producer/test') . '.';
@@ -149,7 +112,7 @@ function message_broker_producer_status() {
   $test_links['user-register-under'] = 'Generate ' . l('test user_register_under producer entry', 'admin/config/services/message-broker-producer/test/user_register_under') . '.';
   $test_links['campaign-signup-noname'] = 'Generate ' . l('test campaign_signup_noname producer entry', 'admin/config/services/message-broker-producer/test/campaign_signup_noname') . '.';
   $test_links['campaign-reportback-noname'] = 'Generate ' . l('test campaign_reportback_noname producer entry', 'admin/config/services/message-broker-producer/test/campaign_reportback_noname') . '.';
-  
+
   return theme('message_broker_producer_status', array('status' => $status, 'test_links' => $test_links));
 }
 
@@ -164,6 +127,18 @@ function message_broker_producer_production_options_form() {
 
   $exchanges = '';
   $selected_exchanges = '';
+
+  // List Queues
+  // /api/queues/vhost
+  // A list of all queues in a given virtual host.
+
+  // List exchanges
+  // /api/exchanges/vhost
+  // A list of all exchanges in a given virtual host.
+
+  // List bindings
+  // /api/bindings/vhost/e/exchange/q/queue
+  // A list of all bindings between an exchange and a queue. Remember, an exchange and a queue can be bound together many times!
 
   // Produce listing of all "production" entries
   /*
