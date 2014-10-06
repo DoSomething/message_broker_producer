@@ -66,38 +66,40 @@ function message_broker_producer_status() {
 
   $status = '';
 
-  // List queues
-  /* @todo: permission access issues for www user
-   *
-   * http://unix.stackexchange.com/questions/15264/executing-a-shell-command-from-php-with-shell-exec
-   * Added:
-   * http    ALL=(username) /usr/local/sbin/rabbitmqctl
-   * to /etc/sudoers
-   *
-   * Program Execution in PHP: exec, system, passthru, and shell_exec, oh my!
-   * http://chipmunkninja.com/Program-Execution-in-PHP%3A-exec-m@
-   *
-   * works
-   * $directoryListing = shell_exec('ls -la /usr/local/sbin');
-   */
-  $queues = shell_exec('/usr/local/sbin/rabbitmqctl list_queues');
-  if ($queues == NULL) {
-    $status['queues'] = 'Queue Listing - No RabbitMQ queues found, check that RabbitMQ is running.';
-  }
-  else {
-    $status['queues'] = print_r($queues, TRUE);
-  }
+  // RabbitMQ Managment API
+  // http://hg.rabbitmq.com/rabbitmq-management/raw-file/rabbitmq_v3_3_5/priv/www/api/index.html
 
-  // List exchanges
-  $exchanges = shell_exec('/usr/local/sbin/rabbitmqctl list_exchanges');
-  if ($exchanges == NULL) {
-    $status['exchanges'] = 'Exchange Listing - No RabbitMQ exchanges found, check that RabbitMQ is running.';
-  }
+  // Control returned results
+  // curl -i -u guest:guest 'http://localhost:15672/api/channels?sort=message_stats.publish_details.rate&sort_reverse=true&columns=name,message_stats.publish_details.rate,message_stats.deliver_get_details.rate'
 
-  // List bindings
-  $bindings = shell_exec('rabbitmqctl list_exchanges');
-  if ($bindings == NULL) {
-    $status['bindings'] = 'Bindings Listing - No RabbitMQ bindings found, check that RabbitMQ is running.';
+  $rabbit_username = variable_get('message_broker_producer_rabbitmq_username', 'guest');
+  $rabbit_password = variable_get('message_broker_producer_rabbitmq_password', 'guest');
+
+  $ch = curl_init();
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+  curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+    'Content-type: application/json',
+    'Accept: application/json'
+  ));
+  curl_setopt($ch, CURLOPT_USERPWD, "$rabbit_username:$rabbit_password");
+  curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+
+  $rabbit_management_api_urls = array(
+    'api-aliveness-test' => variable_get('message_broker_producer_rabbitmq_host', 'localhost') .':15672/api/aliveness-test/' . variable_get('message_broker_producer_rabbitmq_vhost', '%2F'),
+    'api-vhosts' => variable_get('message_broker_producer_rabbitmq_host', 'localhost') .':15672/api/vhosts',
+    'api-overview' => variable_get('message_broker_producer_rabbitmq_host', 'localhost') .':15672/api/overview',
+  );
+
+  foreach ($rabbit_management_api_urls as $call => $rabbit_management_api_url) {
+    curl_setopt($ch, CURLOPT_URL, $rabbit_management_api_url);
+    $jsonResult = curl_exec($ch);
+    $results = json_decode($jsonResult);
+
+    echo( $call . ': <pre>');
+    print_r($results);
+    echo('</pre>');
+
+    $status[$call] = $results->status;
   }
 
   // Test link to produce transactionals queue entry
@@ -110,7 +112,7 @@ function message_broker_producer_status() {
   $test_links['user-register-under'] = 'Generate ' . l('test user_register_under producer entry', 'admin/config/services/message-broker-producer/test/user_register_under') . '.';
   $test_links['campaign-signup-noname'] = 'Generate ' . l('test campaign_signup_noname producer entry', 'admin/config/services/message-broker-producer/test/campaign_signup_noname') . '.';
   $test_links['campaign-reportback-noname'] = 'Generate ' . l('test campaign_reportback_noname producer entry', 'admin/config/services/message-broker-producer/test/campaign_reportback_noname') . '.';
-  
+
   return theme('message_broker_producer_status', array('status' => $status, 'test_links' => $test_links));
 }
 
@@ -125,6 +127,18 @@ function message_broker_producer_production_options_form() {
 
   $exchanges = '';
   $selected_exchanges = '';
+
+  // List Queues
+  // /api/queues/vhost
+  // A list of all queues in a given virtual host.
+
+  // List exchanges
+  // /api/exchanges/vhost
+  // A list of all exchanges in a given virtual host.
+
+  // List bindings
+  // /api/bindings/vhost/e/exchange/q/queue
+  // A list of all bindings between an exchange and a queue. Remember, an exchange and a queue can be bound together many times!
 
   // Produce listing of all "production" entries
   /*
