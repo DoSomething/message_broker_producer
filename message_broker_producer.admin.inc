@@ -64,8 +64,6 @@ function message_broker_producer_config_form($form, &$form_state) {
  */
 function message_broker_producer_status() {
 
-  $status = '';
-
   // RabbitMQ Managment API
   // http://hg.rabbitmq.com/rabbitmq-management/raw-file/rabbitmq_v3_3_5/priv/www/api/index.html
 
@@ -95,11 +93,78 @@ function message_broker_producer_status() {
     $jsonResult = curl_exec($ch);
     $results = json_decode($jsonResult);
 
-    echo( $call . ': <pre>');
-    print_r($results);
-    echo('</pre>');
+    switch ($call) {
+      case 'api-aliveness-test':
+        $status = array();
+        if ($results) {
+          $status[$call] = $results->status;
+        }
+        break;
 
-    $status[$call] = $results->status;
+      case 'api-vhosts':
+        $vhosts = array();
+        if ($results) {
+          foreach ($results as $idx => $entry) {
+            if (!isset($entry->send_oct)) {
+              continue;
+            }
+
+            $name = $entry->name;
+            $send_oct = $entry->send_oct;
+            $vhosts[$name] = $send_oct;
+
+          }
+        }
+        break;
+
+      case 'api-overview':
+        $overview = array();
+
+        $overview['version'] = $results->rabbitmq_version;
+
+        // Extract results for Servers/Listeners.
+        $overview['nodes'] = array();
+        if ($results) {
+          foreach ($results->listeners as $idx => $listener) {
+            $overview['nodes'][$listener->node]  = array(
+              'protocol' => $listener->protocol,
+              'port' => $listener->port,
+              'ip_address' => $listener->ip_address,
+            );
+          }
+        }
+
+        // Extract results for various Counts.
+        $overview['object_totals'] = array();
+        if ($results) {
+          foreach ($results->object_totals as $name => $count) {
+            $overview['object_totals'][$name] = $count;
+          }
+        }
+
+        // Extract results for Contexts.
+        $overview['contexts'] = array();
+        if ($results) {
+          foreach ($results->contexts as $idx => $context) {
+            $overview['contexts'][$idx] = array(
+              'node' => $context->node,
+              'description' => $context->description,
+              'port' => $context->port,
+            );
+          }
+        }
+
+        // echo( $call . ': <pre>');
+        // print_r($results);
+        // echo('</pre>');
+        break;
+    }
+
+    if (!$results) {
+      drupal_set_message("No results for call to API '$call', " .
+                          'check the connection to the Message Broker server.',
+                          'error');
+    }
   }
 
   // Test link to produce transactionals queue entry
@@ -113,7 +178,13 @@ function message_broker_producer_status() {
   $test_links['campaign-signup-noname'] = 'Generate ' . l('test campaign_signup_noname producer entry', 'admin/config/services/message-broker-producer/test/campaign_signup_noname') . '.';
   $test_links['campaign-reportback-noname'] = 'Generate ' . l('test campaign_reportback_noname producer entry', 'admin/config/services/message-broker-producer/test/campaign_reportback_noname') . '.';
 
-  return theme('message_broker_producer_status', array('status' => $status, 'test_links' => $test_links));
+  return theme('message_broker_producer_status',
+                array(
+                  'status' => $status,
+                  'vhosts' => $vhosts,
+                  'overview' => $overview,
+                  'test_links' => $test_links,
+                ));
 }
 
 /**
