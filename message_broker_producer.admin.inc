@@ -217,13 +217,16 @@ function message_broker_producer_production_options_update($target_production) {
  * @return
  *   $form: An array of the form elements
  */
-function message_broker_producer_production_options_form($form, &$form_submit, $target_productionn = NULL) {
+function message_broker_producer_production_options_form($form, &$form_submit, $target_production = NULL) {
 
   $mb_config_settings = message_broker_producer_load_config_options();
+  $exchanges[0] = '-- Select exchange --';
+  foreach($mb_config_settings->rabbit->exchanges as $exchange) {
+    $exchanges[$exchange->name] = $exchange->name;
+  }
 
   if ($target_production == NULL) {
     $form_action = 'Add';
-    $exchanges = '';
     $selected_exchange = '';
   }
   else {
@@ -305,7 +308,12 @@ function message_broker_producer_production_options_form_validate($form, &$form_
 
 }
 
+/**
+ * Process data submitted from message_broker_producer_production_options_form().
+ */
 function message_broker_producer_production_options_form_submit() {
+
+  // INSERT
 
 }
 
@@ -316,9 +324,16 @@ function message_broker_producer_load_config_options() {
 
   $mb_config_library = libraries_load('messagebroker-config');
 
-  $mb_config_path = $GLOBALS['base_url'] . '/' . $mb_config_library['library path'] . '/mb_config.json';
-  $mb_config_json = file_get_contents($mb_config_path);
-  $mb_config_settings = json_decode($mb_config_json);
+  if ($mb_config_library['loaded']) {
+    // $mb_config_path = $GLOBALS['base_url'] . '/' . $mb_config_library['library path'] . '/mb_config.json';
+    $mb_config_path = $mb_config_library['library path'] . '/mb_config.json';
+    // $mb_config_json = file_get_contents($mb_config_path);
+    $mb_config_json = implode(file($mb_config_path));
+    $mb_config_settings = json_decode($mb_config_json);
+    return $mb_config_settings;
+  }
+  else {
+    drupal_set_error('Message Broker Configuration library failed to load.', 'error');
+  }
 
-  return $mb_config_settings;
 }
