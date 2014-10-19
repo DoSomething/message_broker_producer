@@ -187,17 +187,48 @@ function message_broker_producer_status() {
                 ));
 }
 
-/**
- * Manage production type options.
+/*
+ * Pass through function to allow parameters to a form via a hook_menu call to
+ * message_broker_producer_production_options_form()
+ *
+ * @return
+ *   Call to drupal_get_form for the message_broker_producer_production_options_form
+ *   form that includes the additional parameter $target_production
  */
-function message_broker_producer_production_options_form() {
+function message_broker_producer_production_options_update($target_production) {
+  return drupal_get_form('message_broker_producer_production_options_form', $target_production);
+}
+
+/**
+ * Manage production type options - create, update and delete.
+ *
+ * If there are only three arguments in the path it builds the add form and
+ * adds a record. Otherwise it builds the update form where the fourth
+ * argument is the machine_name of the production entry in the
+ * message_broker_producer table.
+ *
+ * @parm
+ *   $form: Array of form elements
+ * @parm
+ *   &$form_submit: Array of the stae of the form elements
+ * @parm
+ *   $target_production: Update/delete of a production record, $target_production will have a value
+ *
+ * @return
+ *   $form: An array of the form elements
+ */
+function message_broker_producer_production_options_form($form, &$form_submit, $target_productionn = NULL) {
 
   $mb_config_settings = message_broker_producer_load_config_options();
 
-  // Load current "produciton" entries
-
-  $exchanges = '';
-  $selected_exchanges = '';
+  if ($target_production == NULL) {
+    $form_action = 'Add';
+    $exchanges = '';
+    $selected_exchange = '';
+  }
+  else {
+    $form_action = 'Update';
+  }
 
   // List Queues
   // /api/queues/vhost
@@ -221,29 +252,61 @@ function message_broker_producer_production_options_form() {
   // Allow selection of the same exchange in multipul production entries.
 
   // Pull out exchanges for listing in multiselect
-  $form['production_name'] = array(
+  $form['message_broker_producer_production_name'] = array(
     '#type' => 'textfield',
     '#title' => t('Production Name'),
-    '#description' => t('The machine name to make '),
+    '#description' => t('A unique machine friendly production name to be referenced to access specific production entries.'),
     '#required' => FALSE,
     '#default_value' => '',
   );
-  $form['exchanges'] = array(
+  $form['message_broker_producer_exchanges'] = array(
     '#type' => 'select',
     '#title' => t('Select Exchange(s)'),
     '#options' => $exchanges,
-    '#default_value' => $selected_exchanges,
-    '#description' => t('Select the exchange'),
+    '#default_value' => $selected_exchange,
+    '#description' => t('Select an exchange to send production requeusts to.'),
+  );
+  $form['message_broker_producer_enabled'] = array(
+    '#type' => 'radios',
+    '#title' => t('Enable/Disable Production'),
+    '#default_value' => $target_production ? $record->enabled : 0,
+    '#options' => array(
+      1 => 'Enable production',
+      0 => 'Disable production',
+    ),
+    '#weight' => 90,
+    '#attributes' => $enabled ? array('class' => array('enabled')) : array('class' => array('disabled')),
   );
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => 'Add Production Type',
     '#weight' => 100,
   );
+  $form['cancel'] = array(
+    '#markup' => l(t('Cancel'), 'admin/config/services/message-broker-producer'),
+    '#weight' => 101,
+  );
 
   // Validate and submit functions
 
   return $form;
+}
+
+/**
+ * Validate form submissions from message_broker_producer_production_options_form().
+ *
+ * Check to make sute the production name is unique.
+ */
+function message_broker_producer_production_options_form_validate($form, &$form_state) {
+
+  if ($production_name_exists) {
+    form_set_error('message_broker_producer_production_name', t('The production name (!production_name) already exists. Use a unique name or delete the existing entry first.', array('!production_name' => $form_state['values']['message_broker_producer_production_name'])));
+  }
+
+}
+
+function message_broker_producer_production_options_form_submit() {
+
 }
 
 /**

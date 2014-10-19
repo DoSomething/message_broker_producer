@@ -68,15 +68,6 @@ function message_broker_producer_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
-  $items['admin/config/services/message-broker-producer/mq-settings'] = array(
-    'title' => 'RabbitMQ Settings',
-    'type' => MENU_LOCAL_TASK,
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('message_broker_producer_config_form'),
-    'access arguments' => array('administer message_broker_producer'),
-    'file' => 'message_broker_producer.admin.inc',
-    'file path' => drupal_get_path('module', 'message_broker_producer'),
-  );
   $items['admin/config/services/message-broker-producer/production-options'] = array(
     'title' => 'Production Options',
     'description' => 'List of production items and their related settings.',
@@ -86,6 +77,27 @@ function message_broker_producer_menu() {
     'access arguments' => array('administer message_broker_producer'),
     'file' => 'message_broker_producer.admin.inc',
     'file path' => drupal_get_path('module', 'message_broker_producer'),
+    'weight' => 10,
+  );
+  $items['admin/config/services/message-broker-producer/production-options/%'] = array(
+    'title' => 'Production Options',
+    'description' => 'Administer production items and their related settings.',
+    'page callback' => 'message_broker_producer_production_options_update',
+    'page arguments' => array(5),
+    'access arguments' => array('administer message_broker_producer'),
+    'file' => 'message_broker_producer.admin.inc',
+    'file path' => drupal_get_path('module', 'message_broker_producer'),
+    'weight' => 11,
+  );
+  $items['admin/config/services/message-broker-producer/mq-settings'] = array(
+    'title' => 'RabbitMQ Settings',
+    'type' => MENU_LOCAL_TASK,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('message_broker_producer_config_form'),
+    'access arguments' => array('administer message_broker_producer'),
+    'file' => 'message_broker_producer.admin.inc',
+    'file path' => drupal_get_path('module', 'message_broker_producer'),
+    'weight' => 20,
   );
   // Testing - remove for release.
   $items['admin/config/services/message-broker-producer/test'] = array(
@@ -93,6 +105,7 @@ function message_broker_producer_menu() {
     'description' => 'Send all test transaction types',
     'page callback' => 'message_broker_producer_test_page',
     'access arguments' => array('administer message_broker_producer'),
+    'type' => MENU_CALLBACK,
   );
   $items['admin/config/services/message-broker-producer/test/%'] = array(
     'title' => 'Message Broker Test Transactions',
@@ -100,6 +113,7 @@ function message_broker_producer_menu() {
     'page callback' => 'message_broker_producer_test_page',
     'page arguments' => array(5),
     'access arguments' => array('administer message_broker_producer'),
+    'type' => MENU_CALLBACK,
   );
 
   return $items;
