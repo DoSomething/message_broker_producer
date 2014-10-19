@@ -188,6 +188,19 @@ function message_broker_producer_status() {
 }
 
 /*
+ * List  production entries
+ */
+function message_broker_producer_production_list() {
+
+  $productions = array();
+
+  return theme('message_broker_producer_production_list',
+                array(
+                  'productions' => $productions,
+                ));
+}
+
+/*
  * Pass through function to allow parameters to a form via a hook_menu call to
  * message_broker_producer_production_options_form()
  *
@@ -259,7 +272,7 @@ function message_broker_producer_production_options_form($form, &$form_submit, $
     '#type' => 'textfield',
     '#title' => t('Routing Key'),
     '#description' => t('A string of key values to define how the produced message will be distributed between the queues attached to the exchange.'),
-    '#required' => TRUE,
+    '#required' => FALSE,
     '#default_value' => '',
   );
   $form['message_broker_producer_status'] = array(
@@ -324,11 +337,13 @@ function message_broker_producer_production_options_form_validate($form, &$form_
 function message_broker_producer_production_options_form_submit($form, &$form_state) {
 
   $production_name = check_plain($form_state['values']['message_broker_producer_production_name']);
+  $selected_exchange = check_plain($form_state['values']['message_broker_producer_exchange']);
 
   // Gather settings for selected exchange
   $mb_config_settings = message_broker_producer_load_config_options();
-  foreach($mb_config_settings->rabbit->exchange as $selected_exchange => $exchange) {
-    if ($selected_exchange == $message_broker_producer_exchange) {
+
+  foreach($mb_config_settings->rabbit->exchanges as $exchange_index => $exchange) {
+    if ($exchange_index == $selected_exchange) {
       // @todo: remove / add queues in config based on selected queues, defaults to all in config file
       $selected_exchange_config = serialize($exchange);
       break;
@@ -351,7 +366,7 @@ function message_broker_producer_production_options_form_submit($form, &$form_st
   drupal_set_message('The ' . $form_state['values']['message_broker_producer_production_name'] . ' production type has been created.', 'notice');
 
   // Return to production listing page
-  drupal_goto('admin/config/services/message-broker-producer');
+  drupal_goto('admin/config/services/message-broker-producer/list-productions');
 }
 
 /**

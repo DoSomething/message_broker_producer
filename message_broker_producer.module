@@ -48,6 +48,11 @@ function message_broker_producer_theme($existing, $type, $theme, $path) {
                       'test_links' => array()),
       'template' => 'templates/message-broker-producer-status',
     ),
+    'message_broker_producer_production_list' => array(
+      'variables' => array(
+                      'productions' => array()),
+      'template' => 'templates/message-broker-producer-production-list',
+    ),
   );
 }
 
@@ -68,7 +73,17 @@ function message_broker_producer_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
-  $items['admin/config/services/message-broker-producer/production-options'] = array(
+  $items['admin/config/services/message-broker-producer/list-productions'] = array(
+    'title' => 'List Productions',
+    'description' => 'List production entries.',
+    'type' => MENU_LOCAL_TASK,
+    'page callback' => 'message_broker_producer_production_list',
+    'access arguments' => array('administer message_broker_producer'),
+    'file' => 'message_broker_producer.admin.inc',
+    'file path' => drupal_get_path('module', 'message_broker_producer'),
+    'weight' => 9,
+  );
+  $items['admin/config/services/message-broker-producer/add-edit-production'] = array(
     'title' => 'Production Options',
     'description' => 'List of production items and their related settings.',
     'type' => MENU_LOCAL_TASK,
@@ -79,7 +94,7 @@ function message_broker_producer_menu() {
     'file path' => drupal_get_path('module', 'message_broker_producer'),
     'weight' => 10,
   );
-  $items['admin/config/services/message-broker-producer/production-options/%'] = array(
+  $items['admin/config/services/message-broker-producer/add-edit-production/%'] = array(
     'title' => 'Production Options',
     'description' => 'Administer production items and their related settings.',
     'page callback' => 'message_broker_producer_production_options_update',
