@@ -228,38 +228,20 @@ function message_broker_producer_production_options_form($form, &$form_submit, $
   if ($target_production == NULL) {
     $form_action = 'Add';
     $selected_exchange = '';
+    $enabled = FALSE;
   }
   else {
     $form_action = 'Update';
+    // @todo: Get selected exchange for existing production entry
+    $selected_exchange = '';
   }
-
-  // List Queues
-  // /api/queues/vhost
-  // A list of all queues in a given virtual host.
-
-  // List exchanges
-  // /api/exchanges/vhost
-  // A list of all exchanges in a given virtual host.
-
-  // List bindings
-  // /api/bindings/vhost/e/exchange/q/queue
-  // A list of all bindings between an exchange and a queue. Remember, an exchange and a queue can be bound together many times!
-
-  // Produce listing of all "production" entries
-  /*
-  '#options' => array(
-    0 => t('No'),
-    1 => t('Yes'),
-  ),
-  */
-  // Allow selection of the same exchange in multipul production entries.
 
   // Pull out exchanges for listing in multiselect
   $form['message_broker_producer_production_name'] = array(
     '#type' => 'textfield',
     '#title' => t('Production Name'),
     '#description' => t('A unique machine friendly production name to be referenced to access specific production entries.'),
-    '#required' => FALSE,
+    '#required' => TRUE,
     '#default_value' => '',
   );
   $form['message_broker_producer_exchanges'] = array(
@@ -268,6 +250,7 @@ function message_broker_producer_production_options_form($form, &$form_submit, $
     '#options' => $exchanges,
     '#default_value' => $selected_exchange,
     '#description' => t('Select an exchange to send production requeusts to.'),
+    '#required' => TRUE,
   );
   $form['message_broker_producer_enabled'] = array(
     '#type' => 'radios',
@@ -302,8 +285,16 @@ function message_broker_producer_production_options_form($form, &$form_submit, $
  */
 function message_broker_producer_production_options_form_validate($form, &$form_state) {
 
-  if ($production_name_exists) {
-    form_set_error('message_broker_producer_production_name', t('The production name (!production_name) already exists. Use a unique name or delete the existing entry first.', array('!production_name' => $form_state['values']['message_broker_producer_production_name'])));
+  if ($form_state['values']['message_broker_producer_production_name'] == '') {
+    form_set_error('message_broker_producer_production_name', t('The production name is required.'));
+  }
+  else {
+    // @todo: Query db for production name
+    $production_name_exists = FALSE;
+
+    if ($production_name_exists) {
+      form_set_error('message_broker_producer_production_name', t('The production name (!production_name) already exists. Use a unique name or delete the existing entry first.', array('!production_name' => $form_state['values']['message_broker_producer_production_name'])));
+    }
   }
 
 }
