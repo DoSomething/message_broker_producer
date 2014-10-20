@@ -188,16 +188,40 @@ function message_broker_producer_status() {
 }
 
 /*
- * List  production entries
+ * List production entries in the message_broker_producer database table.
  */
 function message_broker_producer_production_list() {
 
+  $header = array('Machine Name', 'Queues', 'Routing Key', 'Status', 'Last Updated');
   $productions = array();
 
+  $query = db_select('message_broker_producer', 'mbp', array('target' => 'slave'))
+    ->orderBy('machine_name')
+    ->fields('mbp');
+  $result = $query->execute();
+
+  // Build each row of the table
+  foreach ($result as $production_count => $row) {
+    $config = unserialize($row->config);
+    $queues = array();
+    foreach($config->queues as $queue_count => $queue) {
+      $queues[] = array(
+        'name' => $queue->name
+      );
+    }
+    $productions[] = array(
+      'machine_name' => $row->machine_name,
+      'queues' => $queues,
+      'routing_key' => $row->routing_key,
+      'status' => $row->status,
+      'updated' => $row->updated
+    );
+  }
+
   return theme('message_broker_producer_production_list',
-                array(
-                  'productions' => $productions,
-                ));
+    array(
+      'productions' => theme('table', array('header' => $header, 'rows' => $productions)),
+    ));
 }
 
 /*
