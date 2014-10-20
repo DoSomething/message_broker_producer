@@ -82,6 +82,11 @@ function message_broker_producer_status() {
   curl_setopt($ch, CURLOPT_USERPWD, "$rabbit_username:$rabbit_password");
   curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
 
+  // If the server is down, the smaller of the following two values
+  // will kick in first.
+  curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);  // Connection timeout in seconds.
+  curl_setopt($ch, CURLOPT_TIMEOUT, 5);  // Function execution timeout in seconds.
+
   $rabbit_management_api_urls = array(
     'api-aliveness-test' => variable_get('message_broker_producer_rabbitmq_host', 'localhost') .':15672/api/aliveness-test/' . variable_get('message_broker_producer_rabbitmq_vhost', '%2F'),
     'api-vhosts' => variable_get('message_broker_producer_rabbitmq_host', 'localhost') .':15672/api/vhosts',
