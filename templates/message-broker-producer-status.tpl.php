@@ -12,7 +12,9 @@
     <strong>Messages Sent: </strong><?php print number_format($send_oct) ?></li>
 <?php endforeach; ?>
 <?php if (count($vhosts) == 0): ?>
-  <li>No Virtual Hosts reported</li>
+  <li>No Virtual Hosts reported. Check the RabbitMQ
+    <a href="/admin/config/services/message-broker-producer/mq-settings">
+      connection settings</a>.</li>
 <?php endif; ?>
 </ul>
 <h3>Overview</h3>
@@ -28,7 +30,9 @@
   </li><br />
 <?php endforeach; ?>
 <?php if (count($overview['nodes']) == 0): ?>
-  <li><strong>No Servers reported</strong></li><br />
+  <li><strong>No Servers reported.</strong> Check the RabbitMQ
+    <a href="/admin/config/services/message-broker-producer/mq-settings">
+      connection settings</a>.</li><br />
 <?php endif; ?>
 <li><strong>Counts:</strong>
   <ul>
@@ -46,7 +50,9 @@
   </li><br />
 <?php endforeach; ?>
 <?php if (count($overview['contexts']) == 0): ?>
-  <li><strong>No Contexts reported</strong></li><br />
+  <li><strong>No Contexts reported.</strong> Check the RabbitMQ
+    <a href="/admin/config/services/message-broker-producer/mq-settings">
+      connection settings</a>.</li><br />
 <?php endif; ?>
 </ul>
 <h3>Tests</h3>
