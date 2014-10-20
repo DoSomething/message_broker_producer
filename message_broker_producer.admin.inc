@@ -269,13 +269,57 @@ function message_broker_producer_production_options_form($form, &$form_submit, $
 
   if ($target_production == NULL) {
     $form_action = 'Add';
+
+    $production_name = '';
     $selected_exchange = '';
+    $selected_exchange_description = t('Select an exchange to send production requests to.');
+    $routing_key = '';
     $enabled = FALSE;
+    $submit_label = 'Add Production Type';
   }
   else {
     $form_action = 'Update';
-    // @todo: Get selected exchange for existing production entry
-    $selected_exchange = '';
+
+    $production_name = $target_production;
+    // Lookup production details to display in form while in edit state
+    $query = db_select('message_broker_producer', 'mbp', array('target' => 'slave'))
+      ->fields('mbp', array('config', 'routing_key', 'status', 'updated'))
+      ->condition('mbp.machine_name', $production_name, '=');
+    $record = $query->execute()
+      ->fetchObject();
+    $production_config = unserialize($record->config);
+    $selected_exchange = $production_config->name;
+    $selected_exchange_type = $production_config->type;
+    $selected_exchange_description = 'Type: <strong>' . $selected_exchange_type . '</strong><br />' . $production_config->__comment;
+
+    $selected_exchange_description .= '<div style="margin-left: 10px;">';
+    $selected_exchange_description .= '  <h3>Queues</h3>' . "\n";
+    $selected_exchange_description .= '  <ul>' . "\n";
+    foreach ($production_config->queues as $queue) {
+
+      $selected_exchange_description .= '    <li>';
+      if ($production_config->type == 'topic') {
+        if (isset($queue->name)) {
+          $selected_exchange_description .= '      <strong>' . $queue->name . '</strong>';
+        }
+        if (isset($queue->__comment)) {
+          $selected_exchange_description .= ': ' . $queue->__comment . '<br />';
+        }
+        $selected_exchange_description .= '      Binding Pattern: <strong>' . $queue->binding_pattern . '</strong><br /><br />';
+      }
+      else {
+        $selected_exchange_description .= '      <strong>' . $queue->name . '</strong>: ' . $queue->__comment . '<br />';
+        $selected_exchange_description .= '      Binding Key: <strong>' . $queue->binding_key . '</strong><br /><br />';
+      }
+      $selected_exchange_description .= '    </li>' . "\n";
+
+    }
+    $selected_exchange_description .= '  </ol>' . "\n";
+    $selected_exchange_description .= '</div>' . "\n";
+
+    $routing_key = $record->routing_key;
+    $enabled = $record->status;
+    $submit_label = 'Edit Production Type';
   }
 
   // Pull out exchanges for listing in multiselect
@@ -284,14 +328,14 @@ function message_broker_producer_production_options_form($form, &$form_submit, $
     '#title' => t('Production Name'),
     '#description' => t('A unique machine friendly production name to be referenced to access specific production entries.'),
     '#required' => TRUE,
-    '#default_value' => '',
+    '#default_value' => $production_name,
   );
   $form['message_broker_producer_exchange'] = array(
     '#type' => 'select',
     '#title' => t('Select Exchange(s)'),
     '#options' => $exchanges,
     '#default_value' => $selected_exchange,
-    '#description' => t('Select an exchange to send production requests to.'),
+    '#description' => $selected_exchange_description,
     '#required' => TRUE,
   );
 
@@ -300,24 +344,23 @@ function message_broker_producer_production_options_form($form, &$form_submit, $
   $form['message_broker_producer_routing_key'] = array(
     '#type' => 'textfield',
     '#title' => t('Routing Key'),
-    '#description' => t('Based on the exchange type selected and the related queues assigned to the exchange a string defining the key value(s) to define how the produced message will be distributed between the queues attached to the exchange.'),
+    '#description' => t('Based on the exchange type selected ("' . $selected_exchange . '" is a <strong>' . $selected_exchange_type . '</strong> exchange) and the related queues assigned to the exchange, a string defining the key value(s) to define how the produced message will be distributed between the queues attached to the exchange.'),
     '#required' => FALSE,
-    '#default_value' => '',
+    '#default_value' => $routing_key,
   );
   $form['message_broker_producer_status'] = array(
     '#type' => 'radios',
     '#title' => t('Enable/Disable Production'),
-    '#default_value' => $target_production ? $record->enabled : 0,
+    '#default_value' => $enabled,
     '#options' => array(
       1 => 'Enable production',
       0 => 'Disable production',
     ),
     '#weight' => 90,
-    '#attributes' => $enabled ? array('class' => array('enabled')) : array('class' => array('disabled')),
   );
   $form['submit'] = array(
     '#type' => 'submit',
-    '#value' => 'Add Production Type',
+    '#value' => $submit_label,
     '#weight' => 100,
   );
   $form['cancel'] = array(
