@@ -269,16 +269,29 @@ function message_broker_producer_production_options_form($form, &$form_submit, $
 
   if ($target_production == NULL) {
     $form_action = 'Add';
+    $form['message_broker_producer_production_heading'] = array(
+      '#markup' => '<h1>Add Production</h1>'
+    );
 
     $production_name = '';
     $selected_exchange = '';
+    $selected_exchange_type = '';
     $selected_exchange_description = t('Select an exchange to send production requests to.');
     $routing_key = '';
     $enabled = FALSE;
     $submit_label = 'Add Production Type';
+    $update_production = FALSE;
+
+    $form['message_broker_producer_target'] = array(
+      '#type' => 'value',
+      '#value' => NULL,
+    );
   }
   else {
     $form_action = 'Update';
+    $form['message_broker_producer_production_heading'] = array(
+      '#markup' => '<h1>Update Production</h1>'
+    );
 
     $production_name = $target_production;
     // Lookup production details to display in form while in edit state
@@ -295,6 +308,8 @@ function message_broker_producer_production_options_form($form, &$form_submit, $
     $selected_exchange_description .= '<div style="margin-left: 10px;">';
     $selected_exchange_description .= '  <h3>Queues</h3>' . "\n";
     $selected_exchange_description .= '  <ul>' . "\n";
+
+    // @todo: Make queue items form elements as checkboxes that can be added/removed from production settings
     foreach ($production_config->queues as $queue) {
 
       $selected_exchange_description .= '    <li>';
@@ -320,6 +335,12 @@ function message_broker_producer_production_options_form($form, &$form_submit, $
     $routing_key = $record->routing_key;
     $enabled = $record->status;
     $submit_label = 'Edit Production Type';
+    $update_production = TRUE;
+
+    $form['message_broker_producer_target'] = array(
+      '#type' => 'value',
+      '#value' => $target_production,
+    );
   }
 
   // Pull out exchanges for listing in multiselect
@@ -347,6 +368,7 @@ function message_broker_producer_production_options_form($form, &$form_submit, $
     '#description' => t('Based on the exchange type selected ("' . $selected_exchange . '" is a <strong>' . $selected_exchange_type . '</strong> exchange) and the related queues assigned to the exchange, a string defining the key value(s) to define how the produced message will be distributed between the queues attached to the exchange.'),
     '#required' => FALSE,
     '#default_value' => $routing_key,
+    '#access' => $update_production
   );
   $form['message_broker_producer_status'] = array(
     '#type' => 'radios',
@@ -357,6 +379,7 @@ function message_broker_producer_production_options_form($form, &$form_submit, $
       0 => 'Disable production',
     ),
     '#weight' => 90,
+    '#access' => $update_production
   );
   $form['submit'] = array(
     '#type' => 'submit',
@@ -367,8 +390,6 @@ function message_broker_producer_production_options_form($form, &$form_submit, $
     '#markup' => l(t('Cancel'), 'admin/config/services/message-broker-producer'),
     '#weight' => 101,
   );
-
-  // Validate and submit functions
 
   return $form;
 }
@@ -394,7 +415,6 @@ function message_broker_producer_production_options_form_validate($form, &$form_
       form_set_error('message_broker_producer_production_name', t('The production name (!production_name) already exists. Use a unique name or delete the existing entry first.', array('!production_name' => $form_state['values']['message_broker_producer_production_name'])));
     }
   }
-  echo('message_broker_producer_exchange: ' . $form_state['values']['message_broker_producer_exchange']);
   if ($form_state['values']['message_broker_producer_exchange'] == '0') {
     form_set_error('message_broker_producer_exchange', t('An exchange selection is required.'));
   }
@@ -411,34 +431,69 @@ function message_broker_producer_production_options_form_submit($form, &$form_st
   $production_name = check_plain($form_state['values']['message_broker_producer_production_name']);
   $selected_exchange = check_plain($form_state['values']['message_broker_producer_exchange']);
 
-  // Gather settings for selected exchange
-  $mb_config_settings = message_broker_producer_load_config_options();
+  if ($form_state['values']['message_broker_producer_target'] != NULL) {
 
-  foreach($mb_config_settings->rabbit->exchanges as $exchange_index => $exchange) {
-    if ($exchange_index == $selected_exchange) {
-      // @todo: remove / add queues in config based on selected queues, defaults to all in config file
-      $selected_exchange_config = serialize($exchange);
-      break;
+    // Gather settings for selected exchange
+    // @todo: Needs to be updated to support addition/removal of queues
+    $mb_config_settings = message_broker_producer_load_config_options();
+
+    foreach($mb_config_settings->rabbit->exchanges as $exchange_index => $exchange) {
+      if ($exchange_index == $selected_exchange) {
+        // @todo: remove / add queues in config based on selected queues, defaults to all in config file
+        $selected_exchange_config = serialize($exchange);
+        break;
+      }
     }
+
+    $routing_key = check_plain($form_state['values']['message_broker_producer_routing_key']);
+    $status = check_plain($form_state['values']['message_broker_producer_status']);
+
+    db_update('message_broker_producer')
+      ->fields(array(
+        'machine_name' => $production_name,
+        'config' => $selected_exchange_config,
+        'routing_key' => $routing_key,
+        'status' => $status,
+        'updated' => time(),
+      ))
+      ->condition('machine_name', $production_name)
+      ->execute();
+
+    drupal_set_message('The ' . $form_state['values']['message_broker_producer_production_name'] . ' production type has been updated.', 'notice');
+    drupal_goto('admin/config/services/message-broker-producer/list-productions');
+  }
+  else {
+
+    // Gather settings for selected exchange
+    $mb_config_settings = message_broker_producer_load_config_options();
+
+    $selected_exchange_config = '';
+    foreach($mb_config_settings->rabbit->exchanges as $exchange_index => $exchange) {
+      if ($exchange_index == $selected_exchange) {
+        // @todo: remove / add queues in config based on selected queues, defaults to all in config file
+        $selected_exchange_config = serialize($exchange);
+        break;
+      }
+    }
+
+    // Form fields not displayed for production add, set default values for db_insert
+    $routing_key = '';
+    $status = 0;
+
+    $db_status = db_insert('message_broker_producer')
+      ->fields(array(
+        'machine_name' => $production_name,
+        'config' => $selected_exchange_config,
+        'routing_key' => $routing_key,
+        'status' => $status,
+        'updated' => time(),
+      ))
+      ->execute();
+
+    drupal_set_message('The ' . $form_state['values']['message_broker_producer_production_name'] . ' production type has been created. Complete production settings by defining the routing key value and optionally adjusting what queues the production should distribute messages to.', 'notice');
+    drupal_goto('admin/config/services/message-broker-producer/add-edit-production/' . $production_name);
   }
 
-  $routing_key = check_plain($form_state['values']['message_broker_producer_routing_key']);
-  $status = check_plain($form_state['values']['message_broker_producer_status']);
-
-  db_insert('message_broker_producer')
-    ->fields(array(
-      'machine_name' => $production_name,
-      'config' => $selected_exchange_config,
-      'routing_key' => $routing_key,
-      'status' => $status,
-      'updated' => time(),
-    ))
-    ->execute();
-
-  drupal_set_message('The ' . $form_state['values']['message_broker_producer_production_name'] . ' production type has been created.', 'notice');
-
-  // Return to production listing page
-  drupal_goto('admin/config/services/message-broker-producer/list-productions');
 }
 
 /**
