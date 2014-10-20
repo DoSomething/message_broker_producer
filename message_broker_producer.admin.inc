@@ -189,10 +189,16 @@ function message_broker_producer_status() {
 
 /*
  * List production entries in the message_broker_producer database table.
+ *
+ * A production entry defines the exahange(s) and queue(s) that a message is
+ * sent to and how it's distributed to the the queues.
+ *
+ * @return
+ *   A list in table format of production entries.
  */
 function message_broker_producer_production_list() {
 
-  $header = array('Machine Name', 'Queues', 'Routing Key', 'Status', 'Last Updated');
+  $header = array('Production Name', 'Queues', 'Routing Key', 'Status', 'Last Updated');
   $productions = array();
 
   $query = db_select('message_broker_producer', 'mbp', array('target' => 'slave'))
@@ -209,7 +215,7 @@ function message_broker_producer_production_list() {
     }
     $queues .= '</ul>';
     $productions[] = array(
-      'machine_name' => $row->machine_name,
+      'machine_name' => l($row->machine_name, 'admin/config/services/message-broker-producer/add-edit-production/' . $row->machine_name),
       'queues' => $queues,
       'routing_key' => $row->routing_key,
       'status' => $row->status,
@@ -294,7 +300,7 @@ function message_broker_producer_production_options_form($form, &$form_submit, $
   $form['message_broker_producer_routing_key'] = array(
     '#type' => 'textfield',
     '#title' => t('Routing Key'),
-    '#description' => t('A string of key values to define how the produced message will be distributed between the queues attached to the exchange.'),
+    '#description' => t('Based on the exchange type selected and the related queues assigned to the exchange a string defining the key value(s) to define how the produced message will be distributed between the queues attached to the exchange.'),
     '#required' => FALSE,
     '#default_value' => '',
   );
