@@ -203,12 +203,11 @@ function message_broker_producer_production_list() {
   // Build each row of the table
   foreach ($result as $production_count => $row) {
     $config = unserialize($row->config);
-    $queues = array();
+    $queues = '<ul>';
     foreach($config->queues as $queue_count => $queue) {
-      $queues[] = array(
-        'name' => $queue->name
-      );
+      $queues .= '<li>' . $queue->name . '</li>' . "\n";
     }
+    $queues .= '</ul>';
     $productions[] = array(
       'machine_name' => $row->machine_name,
       'queues' => $queues,
