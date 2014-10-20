@@ -11,6 +11,9 @@
   <li><strong>Host Name: </strong><?php print $name ?>,
     <strong>Messages Sent: </strong><?php print number_format($send_oct) ?></li>
 <?php endforeach; ?>
+<?php if (count($vhosts) == 0): ?>
+  <li>No Virtual Hosts reported</li>
+<?php endif; ?>
 </ul>
 <h3>Overview</h3>
 <ul>
@@ -24,6 +27,9 @@
     </ul>
   </li><br />
 <?php endforeach; ?>
+<?php if (count($overview['nodes']) == 0): ?>
+  <li><strong>No Servers reported</strong></li><br />
+<?php endif; ?>
 <li><strong>Counts:</strong>
   <ul>
   <?php foreach ($overview['object_totals'] as $name => $count): ?>
@@ -39,7 +45,9 @@
     </ul>
   </li><br />
 <?php endforeach; ?>
-</li>
+<?php if (count($overview['contexts']) == 0): ?>
+  <li><strong>No Contexts reported</strong></li><br />
+<?php endif; ?>
 </ul>
 <h3>Tests</h3>
 <ul>
