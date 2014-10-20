@@ -305,32 +305,33 @@ function message_broker_producer_production_options_form($form, &$form_submit, $
     $selected_exchange_type = $production_config->type;
     $selected_exchange_description = 'Type: <strong>' . $selected_exchange_type . '</strong><br />' . $production_config->__comment;
 
-    $selected_exchange_description .= '<div style="margin-left: 10px;">';
-    $selected_exchange_description .= '  <h3>Queues</h3>' . "\n";
-    $selected_exchange_description .= '  <ul>' . "\n";
+    $form['queues'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Queues'),
+      '#collapsible' => TRUE,
+      '#collapsed' => FALSE,
+      '#weight' => 70,
+    );
 
     // @todo: Make queue items form elements as checkboxes that can be added/removed from production settings
     foreach ($production_config->queues as $queue) {
+      
+      $form['queues']['message_broker_producer_production_name_' . $queue->name] = array(
+        '#title' => $queue->name,
+        '#type' => 'checkbox',
+        '#default_value' => TRUE,
+        '#prefix' => '<div style="border: 2px solid; margin: 5px; padding: 3px; width: 350px;">',
+        '#description' => (isset($queue->__comment)) ? $queue->__comment : ''
+      );
 
-      $selected_exchange_description .= '    <li>';
       if ($production_config->type == 'topic') {
-        if (isset($queue->name)) {
-          $selected_exchange_description .= '      <strong>' . $queue->name . '</strong>';
-        }
-        if (isset($queue->__comment)) {
-          $selected_exchange_description .= ': ' . $queue->__comment . '<br />';
-        }
-        $selected_exchange_description .= '      Binding Pattern: <strong>' . $queue->binding_pattern . '</strong><br /><br />';
+        $form['queues']['message_broker_producer_production_name_' . $queue->name]['#suffix'] = 'Binding Pattern: <strong>' . $queue->binding_pattern . '</strong></div>';
       }
       else {
-        $selected_exchange_description .= '      <strong>' . $queue->name . '</strong>: ' . $queue->__comment . '<br />';
-        $selected_exchange_description .= '      Binding Key: <strong>' . $queue->binding_key . '</strong><br /><br />';
+        $form['queues']['message_broker_producer_production_name_' . $queue->name]['#suffix'] = 'Binding Key: <strong>' . $queue->binding_key . '</strong></div>';
       }
-      $selected_exchange_description .= '    </li>' . "\n";
 
     }
-    $selected_exchange_description .= '  </ol>' . "\n";
-    $selected_exchange_description .= '</div>' . "\n";
 
     $routing_key = $record->routing_key;
     $enabled = $record->status;
@@ -358,6 +359,7 @@ function message_broker_producer_production_options_form($form, &$form_submit, $
     '#default_value' => $selected_exchange,
     '#description' => $selected_exchange_description,
     '#required' => TRUE,
+    '#weight' => 60,
   );
 
   // @todo: Generate queue check list based on exchange selection, default to all selected
@@ -368,7 +370,8 @@ function message_broker_producer_production_options_form($form, &$form_submit, $
     '#description' => t('Based on the exchange type selected ("' . $selected_exchange . '" is a <strong>' . $selected_exchange_type . '</strong> exchange) and the related queues assigned to the exchange, a string defining the key value(s) to define how the produced message will be distributed between the queues attached to the exchange.'),
     '#required' => FALSE,
     '#default_value' => $routing_key,
-    '#access' => $update_production
+    '#access' => $update_production,
+    '#weight' => 80,
   );
   $form['message_broker_producer_status'] = array(
     '#type' => 'radios',
