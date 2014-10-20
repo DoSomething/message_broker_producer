@@ -1,5 +1,8 @@
 <?php
 
+define ('MQ_CONNECT_TIMEOUT', 5);
+define ('MQ_EXECUTE_TIMEOUT', 5);
+
 /**
  * @file
  * Content administration and module settings UI.
@@ -81,6 +84,13 @@ function message_broker_producer_status() {
   ));
   curl_setopt($ch, CURLOPT_USERPWD, "$rabbit_username:$rabbit_password");
   curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+
+  // If the server is down, the smaller of the following two values
+  // will kick in first.
+  // CURLOPT_CONNECTTIMEOUT == connection timeout in seconds.
+  // CURLOPT_TIMEOUT == curl function execution timeout in seconds.
+  curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, MQ_CONNECT_TIMEOUT);
+  curl_setopt($ch, CURLOPT_TIMEOUT, MQ_EXECUTE_TIMEOUT);
 
   $rabbit_management_api_urls = array(
     'api-aliveness-test' => variable_get('message_broker_producer_rabbitmq_host', 'localhost') .':15672/api/aliveness-test/' . variable_get('message_broker_producer_rabbitmq_vhost', '%2F'),
