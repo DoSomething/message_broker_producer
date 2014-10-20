@@ -64,7 +64,7 @@ function message_broker_producer_config_form($form, &$form_state) {
  */
 function message_broker_producer_status() {
 
-  // RabbitMQ Managment API
+  // RabbitMQ Management API
   // http://hg.rabbitmq.com/rabbitmq-management/raw-file/rabbitmq_v3_3_5/priv/www/api/index.html
 
   // Control returned results
@@ -187,63 +187,209 @@ function message_broker_producer_status() {
                 ));
 }
 
-/**
- * Manage production type options.
+/*
+ * List production entries in the message_broker_producer database table.
  */
-function message_broker_producer_production_options_form() {
+function message_broker_producer_production_list() {
+
+  $header = array('Machine Name', 'Queues', 'Routing Key', 'Status', 'Last Updated');
+  $productions = array();
+
+  $query = db_select('message_broker_producer', 'mbp', array('target' => 'slave'))
+    ->orderBy('machine_name')
+    ->fields('mbp');
+  $result = $query->execute();
+
+  // Build each row of the table
+  foreach ($result as $production_count => $row) {
+    $config = unserialize($row->config);
+    $queues = '<ul>';
+    foreach($config->queues as $queue_count => $queue) {
+      $queues .= '<li>' . $queue->name . '</li>' . "\n";
+    }
+    $queues .= '</ul>';
+    $productions[] = array(
+      'machine_name' => $row->machine_name,
+      'queues' => $queues,
+      'routing_key' => $row->routing_key,
+      'status' => $row->status,
+      'updated' => $row->updated
+    );
+  }
+
+  return theme('message_broker_producer_production_list',
+    array(
+      'productions' => theme('table', array('header' => $header, 'rows' => $productions)),
+    ));
+}
+
+/*
+ * Pass through function to allow parameters to a form via a hook_menu call to
+ * message_broker_producer_production_options_form()
+ *
+ * @return
+ *   Call to drupal_get_form for the message_broker_producer_production_options_form
+ *   form that includes the additional parameter $target_production
+ */
+function message_broker_producer_production_options_update($target_production) {
+  return drupal_get_form('message_broker_producer_production_options_form', $target_production);
+}
+
+/**
+ * Manage production type options - create, update and delete.
+ *
+ * If there are only three arguments in the path it builds the add form and
+ * adds a record. Otherwise it builds the update form where the fourth
+ * argument is the machine_name of the production entry in the
+ * message_broker_producer table.
+ *
+ * @parm
+ *   $form: Array of form elements
+ * @parm
+ *   &$form_submit: Array of the state of the form elements
+ * @parm
+ *   $target_production: Update/delete of a production record, $target_production will have a value
+ *
+ * @return
+ *   $form: An array of the form elements
+ */
+function message_broker_producer_production_options_form($form, &$form_submit, $target_production = NULL) {
 
   $mb_config_settings = message_broker_producer_load_config_options();
+  $exchanges[0] = '-- Select exchange --';
+  foreach($mb_config_settings->rabbit->exchanges as $exchange) {
+    $exchanges[$exchange->name] = $exchange->name;
+  }
 
-  // Load current "produciton" entries
-
-  $exchanges = '';
-  $selected_exchanges = '';
-
-  // List Queues
-  // /api/queues/vhost
-  // A list of all queues in a given virtual host.
-
-  // List exchanges
-  // /api/exchanges/vhost
-  // A list of all exchanges in a given virtual host.
-
-  // List bindings
-  // /api/bindings/vhost/e/exchange/q/queue
-  // A list of all bindings between an exchange and a queue. Remember, an exchange and a queue can be bound together many times!
-
-  // Produce listing of all "production" entries
-  /*
-  '#options' => array(
-    0 => t('No'),
-    1 => t('Yes'),
-  ),
-  */
-  // Allow selection of the same exchange in multipul production entries.
+  if ($target_production == NULL) {
+    $form_action = 'Add';
+    $selected_exchange = '';
+    $enabled = FALSE;
+  }
+  else {
+    $form_action = 'Update';
+    // @todo: Get selected exchange for existing production entry
+    $selected_exchange = '';
+  }
 
   // Pull out exchanges for listing in multiselect
-  $form['production_name'] = array(
+  $form['message_broker_producer_production_name'] = array(
     '#type' => 'textfield',
     '#title' => t('Production Name'),
-    '#description' => t('The machine name to make '),
-    '#required' => FALSE,
+    '#description' => t('A unique machine friendly production name to be referenced to access specific production entries.'),
+    '#required' => TRUE,
     '#default_value' => '',
   );
-  $form['exchanges'] = array(
+  $form['message_broker_producer_exchange'] = array(
     '#type' => 'select',
     '#title' => t('Select Exchange(s)'),
     '#options' => $exchanges,
-    '#default_value' => $selected_exchanges,
-    '#description' => t('Select the exchange'),
+    '#default_value' => $selected_exchange,
+    '#description' => t('Select an exchange to send production requests to.'),
+    '#required' => TRUE,
+  );
+
+  // @todo: Generate queue check list based on exchange selection, default to all selected
+
+  $form['message_broker_producer_routing_key'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Routing Key'),
+    '#description' => t('A string of key values to define how the produced message will be distributed between the queues attached to the exchange.'),
+    '#required' => FALSE,
+    '#default_value' => '',
+  );
+  $form['message_broker_producer_status'] = array(
+    '#type' => 'radios',
+    '#title' => t('Enable/Disable Production'),
+    '#default_value' => $target_production ? $record->enabled : 0,
+    '#options' => array(
+      1 => 'Enable production',
+      0 => 'Disable production',
+    ),
+    '#weight' => 90,
+    '#attributes' => $enabled ? array('class' => array('enabled')) : array('class' => array('disabled')),
   );
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => 'Add Production Type',
     '#weight' => 100,
   );
+  $form['cancel'] = array(
+    '#markup' => l(t('Cancel'), 'admin/config/services/message-broker-producer'),
+    '#weight' => 101,
+  );
 
   // Validate and submit functions
 
   return $form;
+}
+
+/**
+ * Validate form submissions from message_broker_producer_production_options_form().
+ *
+ * Check to make sure the production name is unique.
+ */
+function message_broker_producer_production_options_form_validate($form, &$form_state) {
+
+  if ($form_state['values']['message_broker_producer_production_name'] == '') {
+    form_set_error('message_broker_producer_production_name', t('The production name is required.'));
+  }
+  else {
+    if (strpos($form_state['values']['message_broker_producer_production_name'], ' ') !== FALSE) {
+      form_set_error('message_broker_producer_production_name', t('The production name must not contain spaces.'));
+    }
+    // @todo: Query db for production name
+    $production_name_exists = FALSE;
+
+    if ($production_name_exists) {
+      form_set_error('message_broker_producer_production_name', t('The production name (!production_name) already exists. Use a unique name or delete the existing entry first.', array('!production_name' => $form_state['values']['message_broker_producer_production_name'])));
+    }
+  }
+  echo('message_broker_producer_exchange: ' . $form_state['values']['message_broker_producer_exchange']);
+  if ($form_state['values']['message_broker_producer_exchange'] == '0') {
+    form_set_error('message_broker_producer_exchange', t('An exchange selection is required.'));
+  }
+
+  // @todo: Add validation when status is enabled
+  //  - validate  routing key value as validated based on selected queues and the exchange type
+}
+
+/**
+ * Process data submitted from message_broker_producer_production_options_form().
+ */
+function message_broker_producer_production_options_form_submit($form, &$form_state) {
+
+  $production_name = check_plain($form_state['values']['message_broker_producer_production_name']);
+  $selected_exchange = check_plain($form_state['values']['message_broker_producer_exchange']);
+
+  // Gather settings for selected exchange
+  $mb_config_settings = message_broker_producer_load_config_options();
+
+  foreach($mb_config_settings->rabbit->exchanges as $exchange_index => $exchange) {
+    if ($exchange_index == $selected_exchange) {
+      // @todo: remove / add queues in config based on selected queues, defaults to all in config file
+      $selected_exchange_config = serialize($exchange);
+      break;
+    }
+  }
+
+  $routing_key = check_plain($form_state['values']['message_broker_producer_routing_key']);
+  $status = check_plain($form_state['values']['message_broker_producer_status']);
+
+  db_insert('message_broker_producer')
+    ->fields(array(
+      'machine_name' => $production_name,
+      'config' => $selected_exchange_config,
+      'routing_key' => $routing_key,
+      'status' => $status,
+      'updated' => time(),
+    ))
+    ->execute();
+
+  drupal_set_message('The ' . $form_state['values']['message_broker_producer_production_name'] . ' production type has been created.', 'notice');
+
+  // Return to production listing page
+  drupal_goto('admin/config/services/message-broker-producer/list-productions');
 }
 
 /**
@@ -253,9 +399,16 @@ function message_broker_producer_load_config_options() {
 
   $mb_config_library = libraries_load('messagebroker-config');
 
-  $mb_config_path = $GLOBALS['base_url'] . '/' . $mb_config_library['library path'] . '/mb_config.json';
-  $mb_config_json = file_get_contents($mb_config_path);
-  $mb_config_settings = json_decode($mb_config_json);
+  if ($mb_config_library['loaded']) {
+    // $mb_config_path = $GLOBALS['base_url'] . '/' . $mb_config_library['library path'] . '/mb_config.json';
+    $mb_config_path = $mb_config_library['library path'] . '/mb_config.json';
+    // $mb_config_json = file_get_contents($mb_config_path);
+    $mb_config_json = implode(file($mb_config_path));
+    $mb_config_settings = json_decode($mb_config_json);
+    return $mb_config_settings;
+  }
+  else {
+    drupal_set_error('Message Broker Configuration library failed to load.', 'error');
+  }
 
-  return $mb_config_settings;
 }

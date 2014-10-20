@@ -123,7 +123,7 @@ function message_broker_producer_uninstall() {
  */
 function message_broker_producer_enable() {
 
-  drupal_set_message(st('The Message Broker Producer module has been enabled. Administer the production entries that are referenced in message_broker_producer(<production_name>) in ') .
+  drupal_set_message(st('The Message Broker Producer module has been enabled including message_broker_producer database table. Administer the production entries that are referenced in message_broker_producer(<production_name>) in ') .
       ' ' . l(st('Account Settings'), 'admin/config/services/message-broker-producer/production-options') . '.',
     'status');
 }
