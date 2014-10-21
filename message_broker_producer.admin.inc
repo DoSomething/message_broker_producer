@@ -154,9 +154,6 @@ function message_broker_producer_status() {
           }
         }
 
-        // echo( $call . ': <pre>');
-        // print_r($results);
-        // echo('</pre>');
         break;
     }
 
@@ -315,8 +312,8 @@ function message_broker_producer_production_options_form($form, &$form_submit, $
 
     // @todo: Make queue items form elements as checkboxes that can be added/removed from production settings
     foreach ($production_config->queues as $queue) {
-      
-      $form['queues']['message_broker_producer_production_name_' . $queue->name] = array(
+
+      $form['queues']['message_broker_producer_queue_' . $queue->name] = array(
         '#title' => $queue->name,
         '#type' => 'checkbox',
         '#default_value' => TRUE,
@@ -325,10 +322,10 @@ function message_broker_producer_production_options_form($form, &$form_submit, $
       );
 
       if ($production_config->type == 'topic') {
-        $form['queues']['message_broker_producer_production_name_' . $queue->name]['#suffix'] = 'Binding Pattern: <strong>' . $queue->binding_pattern . '</strong></div>';
+        $form['queues']['message_broker_producer_queue_' . $queue->name]['#suffix'] = 'Binding Pattern: <strong>' . $queue->binding_pattern . '</strong></div>';
       }
       else {
-        $form['queues']['message_broker_producer_production_name_' . $queue->name]['#suffix'] = 'Binding Key: <strong>' . $queue->binding_key . '</strong></div>';
+        $form['queues']['message_broker_producer_queue_' . $queue->name]['#suffix'] = 'Binding Key: <strong>' . $queue->binding_key . '</strong></div>';
       }
 
     }
@@ -338,6 +335,19 @@ function message_broker_producer_production_options_form($form, &$form_submit, $
     $submit_label = 'Edit Production Type';
     $update_production = TRUE;
 
+    // Maintain the previous selected exchange. If changed all the queue settings
+    // need to be reloaded
+    $form['message_broker_producer_previous_exchange'] = array(
+      '#type' => 'value',
+      '#value' => $selected_exchange,
+    );
+    // Maintain the previous config to ensure past setting are not lost in
+    // this update
+    $form['message_broker_producer_previous_config'] = array(
+      '#type' => 'value',
+      '#value' => serialize($production_config),
+    );
+    // Used to monitor is it's an update or a new production
     $form['message_broker_producer_target'] = array(
       '#type' => 'value',
       '#value' => $target_production,
@@ -424,6 +434,8 @@ function message_broker_producer_production_options_form_validate($form, &$form_
 
   // @todo: Add validation when status is enabled
   //  - validate  routing key value as validated based on selected queues and the exchange type
+
+  // @todo: validate that at least one queue is included in production
 }
 
 /**
@@ -434,18 +446,40 @@ function message_broker_producer_production_options_form_submit($form, &$form_st
   $production_name = check_plain($form_state['values']['message_broker_producer_production_name']);
   $selected_exchange = check_plain($form_state['values']['message_broker_producer_exchange']);
 
+  // "target" is set, update production entry rather than create new entry
   if ($form_state['values']['message_broker_producer_target'] != NULL) {
 
-    // Gather settings for selected exchange
-    // @todo: Needs to be updated to support addition/removal of queues
-    $mb_config_settings = message_broker_producer_load_config_options();
+    // Check for change in exchange, reload queues from config if changed
+    if ($form_state['values']['message_broker_producer_previous_exchange'] == $selected_exchange) {
 
-    foreach($mb_config_settings->rabbit->exchanges as $exchange_index => $exchange) {
-      if ($exchange_index == $selected_exchange) {
-        // @todo: remove / add queues in config based on selected queues, defaults to all in config file
-        $selected_exchange_config = serialize($exchange);
-        break;
+      // Gather settings for selected exchange
+      $mb_config_settings = unserialize($form_state['values']['message_broker_producer_previous_config']);
+
+      foreach($mb_config_settings->queues as $queue) {
+        foreach($form_state['values'] as $queue_name => $queue_state) {
+          if ((substr($queue_name, 30) == $queue->name) && ($queue_state == 0)) {
+            $remove_queue = substr($queue_name, 30);
+            unset($mb_config_settings->queues->$remove_queue);
+          }
+        }
       }
+
+      $selected_exchange_config = serialize($mb_config_settings);
+    }
+    else {
+
+      // Gather settings for selected exchange
+      $mb_config_settings = message_broker_producer_load_config_options();
+
+      $selected_exchange_config = '';
+      foreach($mb_config_settings->rabbit->exchanges as $exchange_index => $exchange) {
+        if ($exchange_index == $selected_exchange) {
+          // @todo: remove / add queues in config based on selected queues, defaults to all in config file
+          $selected_exchange_config = serialize($exchange);
+          break;
+        }
+      }
+
     }
 
     $routing_key = check_plain($form_state['values']['message_broker_producer_routing_key']);
