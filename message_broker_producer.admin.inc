@@ -6,7 +6,12 @@
  */
 
 /**
- * Configuration form
+ * Configuration and connection settings.
+ *
+ * @parm array $form
+ *   Array of form elements.
+ * @parm array &$form_submit
+ *   Array of the state of the form elements.
  */
 function message_broker_producer_config_form($form, &$form_state) {
 
@@ -60,7 +65,8 @@ function message_broker_producer_config_form($form, &$form_state) {
 }
 
 /**
- * List RabbitMQ status
+ * List RabbitMQ status via connection to RabbitMQ management plugin supplied
+ * endpoint via port 15672.
  */
 function message_broker_producer_status() {
 
@@ -230,12 +236,18 @@ function message_broker_producer_production_list() {
  * Pass through function to allow parameters to a form via a hook_menu call to
  * message_broker_producer_production_options_form()
  *
+ * @parm string $target_production
+ *   Update/delete of a production record, $target_production will have a value.
+ * @parm boolesn $queue_reset
+ *   Trigger reset of select queues, reload from config file based on selected
+ *   exchange supplied in parameter.
+ *
  * @return
  *   Call to drupal_get_form for the message_broker_producer_production_options_form
  *   form that includes the additional parameter $target_production
  */
-function message_broker_producer_production_options_update($target_production) {
-  return drupal_get_form('message_broker_producer_production_options_form', $target_production);
+function message_broker_producer_production_options_update($target_production, $queue_reset = '') {
+  return drupal_get_form('message_broker_producer_production_options_form', $target_production, $queue_reset);
 }
 
 /**
@@ -246,17 +258,20 @@ function message_broker_producer_production_options_update($target_production) {
  * argument is the machine_name of the production entry in the
  * message_broker_producer table.
  *
- * @parm
- *   $form: Array of form elements
- * @parm
- *   &$form_submit: Array of the state of the form elements
- * @parm
- *   $target_production: Update/delete of a production record, $target_production will have a value
+ * @parm array $form
+ *   Array of form elements.
+ * @parm array &$form_submit
+ *   Array of the state of the form elements.
+ * @parm string $target_production
+ *   Update/delete of a production record, $target_production will have a value.
+ * @parm boolesn $exchange_queue_reset
+ *   Trigger reset of select queues, reload from config file based on selected
+ *   exchange supplied in parameter.
  *
  * @return
  *   $form: An array of the form elements
  */
-function message_broker_producer_production_options_form($form, &$form_submit, $target_production = NULL) {
+function message_broker_producer_production_options_form($form, &$form_submit, $target_production = NULL, $exchange_queue_reset = '') {
 
   $mb_config_settings = message_broker_producer_load_config_options();
   $exchanges[0] = '-- Select exchange --';
@@ -310,7 +325,13 @@ function message_broker_producer_production_options_form($form, &$form_submit, $
       '#weight' => 70,
     );
 
-    // @todo: Make queue items form elements as checkboxes that can be added/removed from production settings
+    // Reset assigned queues, relead from config file rather than load from
+    // config value in database record for production entry.
+    echo('exchange_queue_reset: ' . $exchange_queue_reset. '<br />');
+    if (isset($exchange_queue_reset) && $exchange_queue_reset != '') {
+      $production_config->queues = $mb_config_settings->rabbit->exchanges->$exchange_queue_reset->queues;
+    }
+
     foreach ($production_config->queues as $queue) {
 
       $form['queues']['message_broker_producer_queue_' . $queue->name] = array(
@@ -329,6 +350,11 @@ function message_broker_producer_production_options_form($form, &$form_submit, $
       }
 
     }
+    // Queue reset link
+    $form['queues']['message_broker_producer_queue_reset'] = array(
+      '#type' => 'item',
+      '#markup' => l(t('-> Reload queues from config file.'), 'admin/config/services/message-broker-producer/add-edit-production/' . $production_name . '/' . $selected_exchange),
+    );
 
     $routing_key = $record->routing_key;
     $enabled = $record->status;
@@ -371,9 +397,6 @@ function message_broker_producer_production_options_form($form, &$form_submit, $
     '#required' => TRUE,
     '#weight' => 60,
   );
-
-  // @todo: Generate queue check list based on exchange selection, default to all selected
-
   $form['message_broker_producer_routing_key'] = array(
     '#type' => 'textfield',
     '#title' => t('Routing Key'),
@@ -410,7 +433,10 @@ function message_broker_producer_production_options_form($form, &$form_submit, $
 /**
  * Validate form submissions from message_broker_producer_production_options_form().
  *
- * Check to make sure the production name is unique.
+ * @parm array $form
+ *   Array of form elements.
+ * @parm array &$form_submit
+ *   Array of the state of the form elements.
  */
 function message_broker_producer_production_options_form_validate($form, &$form_state) {
 
@@ -440,6 +466,11 @@ function message_broker_producer_production_options_form_validate($form, &$form_
 
 /**
  * Process data submitted from message_broker_producer_production_options_form().
+ *
+ * @parm array $form
+ *   Array of form elements.
+ * @parm array &$form_submit
+ *   Array of the state of the form elements.
  */
 function message_broker_producer_production_options_form_submit($form, &$form_state) {
 
@@ -474,7 +505,6 @@ function message_broker_producer_production_options_form_submit($form, &$form_st
       $selected_exchange_config = '';
       foreach($mb_config_settings->rabbit->exchanges as $exchange_index => $exchange) {
         if ($exchange_index == $selected_exchange) {
-          // @todo: remove / add queues in config based on selected queues, defaults to all in config file
           $selected_exchange_config = serialize($exchange);
           break;
         }
