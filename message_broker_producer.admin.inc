@@ -592,33 +592,19 @@ function message_broker_producer_production_options_form_submit($form, &$form_st
 }
 
 /**
- * Menu callback. Get confirmation to delete a production from the database.
- *
- * @parm array $form
- *   Array of form elements.
- * @parm array &$form_submit
- *   Array of the state of the form elements.
- * @parm string var
- *   Machine name of production to be deleted.
- */
-function message_broker_producer_delete_production($form, &$form_state, $var = NULL) {
-  return drupal_build_form('message_broker_producer_delete_confirm', $form_state);
-}
-
-/**
  * Build a confirmation form for deleting a production.
  *
  * @parm array $form
  *   Array of form elements.
  * @parm array &$form_submit
  *   Array of the state of the form elements.
- * @parm string $var
+ * @parm string $machine_name
  *   Machine name of production to be deleted.
  */
-function message_broker_producer_delete_confirm($form, &$form_state, $var = NULL) {
+function message_broker_producer_delete_confirm($form, &$form_state, $machine_name = NULL) {
   $form['machine_name'] = array(
     '#type' => 'value',
-    '#value' => $var,
+    '#value' => $machine_name,
   );
 
   $heading = t('Delete');
@@ -637,7 +623,7 @@ function message_broker_producer_delete_confirm($form, &$form_state, $var = NULL
  * Deletes the production from the database, and
  * returns the user to the List Productions page.
  */
-function message_broker_producer_delete_confirm_submit($form, &$form_state, $var = NULL) {
+function message_broker_producer_delete_confirm_submit($form, &$form_state) {
 
   $machine_name = $form_state['values']['machine_name'];
 
