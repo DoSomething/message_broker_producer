@@ -222,7 +222,7 @@ function message_broker_producer_production_list() {
       'queues' => $queues,
       'routing_key' => $row->routing_key,
       'status' => ($row->status) ? 'Enabled' : 'Disabled',
-      'updated' => $row->updated
+      'updated' => date('D M j G:i:s T Y', $row->updated)
     );
   }
 
