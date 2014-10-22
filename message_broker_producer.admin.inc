@@ -221,7 +221,7 @@ function message_broker_producer_production_list() {
       'machine_name' => l($row->machine_name, 'admin/config/services/message-broker-producer/add-edit-production/' . $row->machine_name),
       'queues' => $queues,
       'routing_key' => $row->routing_key,
-      'status' => $row->status,
+      'status' => ($row->status) ? 'Enabled' : 'Disabled',
       'updated' => $row->updated
     );
   }
