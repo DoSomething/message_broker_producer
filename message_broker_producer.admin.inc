@@ -470,16 +470,18 @@ function message_broker_producer_production_options_form_validate($form, &$form_
   // @todo: Add validation when status is enabled
   //  - validate  routing key value as validated based on selected queues and the exchange type
 
-  // @todo: validate that at least one queue is included in production
-  $queue_selected = FALSE;
-  foreach($form_state['values'] as $submitted_field_index => $submitted_field_value) {
-    if ((strpos($submitted_field_index, 'message_broker_producer_queue_') !== FALSE) && ($submitted_field_value == 1)) {
-      $queue_selected = TRUE;
+  // validate that at least one queue is included in production in "edit" state (message_broker_producer_target is set)
+  if ($form_state['values']['message_broker_producer_target'] != NULL) {
+    $queue_selected = FALSE;
+    foreach($form_state['values'] as $submitted_field_index => $submitted_field_value) {
+      if ((strpos($submitted_field_index, 'message_broker_producer_queue_') !== FALSE) && ($submitted_field_value == 1)) {
+        $queue_selected = TRUE;
+      }
     }
-  }
-  if (!$queue_selected) {
-    form_set_error('message_broker_producer_exchange', t('At least one queue must be enabled for the production. The queue list has been reloaded from the configuration file.'));
-     drupal_goto('admin/config/services/message-broker-producer/add-edit-production/' . $form_state['values']['message_broker_producer_production_name'] . '/' . $form_state['values']['message_broker_producer_exchange']);
+    if (!$queue_selected) {
+      form_set_error('message_broker_producer_exchange', t('At least one queue must be enabled for the production. The queue list has been reloaded from the configuration file.'));
+       drupal_goto('admin/config/services/message-broker-producer/add-edit-production/' . $form_state['values']['message_broker_producer_production_name'] . '/' . $form_state['values']['message_broker_producer_exchange']);
+    }
   }
 }
 
