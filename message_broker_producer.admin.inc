@@ -211,7 +211,8 @@ function message_broker_producer_status() {
  */
 function message_broker_producer_production_list() {
 
-  $header = array('Production Name', 'Queues', 'Routing Key', 'Status', 'Last Updated');
+  $header = array('Production Name', 'Queues', 'Routing Key', 'Status', 'Last Updated', '');
+
   $productions = array();
 
   $query = db_select('message_broker_producer_productions', 'mbp', array('target' => 'slave'))
@@ -227,12 +228,18 @@ function message_broker_producer_production_list() {
       $queues .= '<li>' . $queue->name . '</li>' . "\n";
     }
     $queues .= '</ul>';
+    $delete_link
+      = l(t('Delete'),
+          'admin/config/services/message-broker-producer/delete-production/'
+            . $row->machine_name
+        );
     $productions[] = array(
       'machine_name' => l($row->machine_name, 'admin/config/services/message-broker-producer/add-edit-production/' . $row->machine_name),
       'queues' => $queues,
       'routing_key' => $row->routing_key,
       'status' => ($row->status) ? 'Enabled' : 'Disabled',
-      'updated' => date('D M j G:i:s T Y', $row->updated)
+      'updated' => date('D M j G:i:s T Y', $row->updated),
+      'delete_link' => $delete_link,
     );
   }
 
@@ -582,6 +589,72 @@ function message_broker_producer_production_options_form_submit($form, &$form_st
     drupal_goto('admin/config/services/message-broker-producer/add-edit-production/' . $production_name);
   }
 
+}
+
+/**
+ * Menu callback. Get confirmation to delete a production from the database.
+ *
+ * @parm array $form
+ *   Array of form elements.
+ * @parm array &$form_submit
+ *   Array of the state of the form elements.
+ * @parm string var
+ *   Machine name of production to be deleted.
+ */
+function message_broker_producer_delete_production($form, &$form_state, $var = NULL) {
+  return drupal_build_form('message_broker_producer_delete_confirm', $form_state);
+}
+
+/**
+ * Build a confirmation form for deleting a production.
+ *
+ * @parm array $form
+ *   Array of form elements.
+ * @parm array &$form_submit
+ *   Array of the state of the form elements.
+ * @parm string $var
+ *   Machine name of production to be deleted.
+ */
+function message_broker_producer_delete_confirm($form, &$form_state, $var = NULL) {
+  $form['machine_name'] = array(
+    '#type' => 'value',
+    '#value' => $var,
+  );
+
+  $heading = t('Delete');
+  $cancel_path = array('path' => 'admin/config/services/message-broker-producer/list-productions');
+  $caption = t('<p>Are you sure you want to delete this production?</p>'
+                . '<p>This action cannot be undone.</p>');
+  $yes = t('Delete');
+  $no = t('Cancel');
+
+  return confirm_form($form, $heading, $cancel_path, $caption, $yes, $no);
+}
+
+/**
+ * Submit function for the form for deleting a production.
+ *
+ * Deletes the production from the database, and
+ * returns the user to the List Productions page.
+ */
+function message_broker_producer_delete_confirm_submit($form, &$form_state, $var = NULL) {
+
+  $machine_name = $form_state['values']['machine_name'];
+
+  $num_deleted = db_delete('message_broker_producer_productions')
+    ->condition('machine_name', $machine_name)
+    ->execute();
+
+  if ($num_deleted == 1) {
+    drupal_set_message(t('The production has been deleted.'), 'status');
+  }
+  else {
+    drupal_set_message(
+      t('The production was <strong>NOT</strong> deleted from the database.'),
+      'error');
+  }
+
+  drupal_goto('admin/config/services/message-broker-producer/list-productions');
 }
 
 /**
