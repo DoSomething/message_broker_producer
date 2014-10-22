@@ -327,7 +327,6 @@ function message_broker_producer_production_options_form($form, &$form_submit, $
 
     // Reset assigned queues, relead from config file rather than load from
     // config value in database record for production entry.
-    echo('exchange_queue_reset: ' . $exchange_queue_reset. '<br />');
     if (isset($exchange_queue_reset) && $exchange_queue_reset != '') {
       $production_config->queues = $mb_config_settings->rabbit->exchanges->$exchange_queue_reset->queues;
     }
@@ -400,7 +399,7 @@ function message_broker_producer_production_options_form($form, &$form_submit, $
   $form['message_broker_producer_routing_key'] = array(
     '#type' => 'textfield',
     '#title' => t('Routing Key'),
-    '#description' => t('Based on the exchange type selected ("' . $selected_exchange . '" is a <strong>' . $selected_exchange_type . '</strong> exchange) and the related queues assigned to the exchange, a string defining the key value(s) to define how the produced message will be distributed between the queues attached to the exchange.'),
+    '#description' => t('Based on the exchange type selected - "' . $selected_exchange . '" is a <strong>' . $selected_exchange_type . '</strong> exchange, the queues assigned to the exchange will have "Binding Patterns" or "Binding Key" values to help define the routing key value for this production. The exchange type and routing key value defines how messages are distributed to the various connected queues.'),
     '#required' => FALSE,
     '#default_value' => $routing_key,
     '#access' => $update_production,
@@ -462,6 +461,16 @@ function message_broker_producer_production_options_form_validate($form, &$form_
   //  - validate  routing key value as validated based on selected queues and the exchange type
 
   // @todo: validate that at least one queue is included in production
+  $queue_selected = FALSE;
+  foreach($form_state['values'] as $submitted_field_index => $submitted_field_value) {
+    if ((strpos($submitted_field_index, 'message_broker_producer_queue_') !== FALSE) && ($submitted_field_value == 1)) {
+      $queue_selected = TRUE;
+    }
+  }
+  if (!$queue_selected) {
+    form_set_error('message_broker_producer_exchange', t('At least one queue must be enabled for the production. The queue list has been reloaded from the configuration file.'));
+     drupal_goto('admin/config/services/message-broker-producer/add-edit-production/' . $form_state['values']['message_broker_producer_production_name'] . '/' . $form_state['values']['message_broker_producer_exchange']);
+  }
 }
 
 /**

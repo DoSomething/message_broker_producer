@@ -84,7 +84,7 @@ function message_broker_producer_menu() {
     'weight' => 9,
   );
   $items['admin/config/services/message-broker-producer/add-edit-production'] = array(
-    'title' => 'Production Options',
+    'title' => 'Add/Edit Production',
     'description' => 'List of production items and their related settings.',
     'type' => MENU_LOCAL_TASK,
     'page callback' => 'drupal_get_form',
