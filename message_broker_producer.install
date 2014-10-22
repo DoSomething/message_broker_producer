@@ -14,7 +14,7 @@
  */
 function message_broker_producer_schema() {
 
-  $schema['message_broker_producer'] = array(
+  $schema['message_broker_producer_productions'] = array(
     'description' => 'Message Broker Producer production entries. Configuration entries in this table are based on setting found in the mb_config.json file.',
     'fields' => array(
       'machine_name' => array(
@@ -123,7 +123,7 @@ function message_broker_producer_uninstall() {
  */
 function message_broker_producer_enable() {
 
-  drupal_set_message(st('The Message Broker Producer module has been enabled including message_broker_producer database table. Administer the production entries that are referenced in message_broker_producer(<production_name>) in ') .
+  drupal_set_message(st('The Message Broker Producer module has been enabled including message_broker_producer_productions database table. Administer the production entries and RabbitMQ connections settings in ') .
       ' ' . l(st('Account Settings'), 'admin/config/services/message-broker-producer/production-options') . '.',
     'status');
 }
@@ -175,7 +175,7 @@ function message_broker_producer_update_7002(&$sandbox) {
 
   // Define schema to allow upgrade path as hook_schema
   // may change in future versions.
-  $schema['message_broker_producer'] = array(
+  $schema['message_broker_producer_productions'] = array(
     'description' => 'Message Broker Producer production entries. Configuration entries in this table are based on setting found in the mb_config.json file.',
     'fields' => array(
       'machine_name' => array(
@@ -217,5 +217,5 @@ function message_broker_producer_update_7002(&$sandbox) {
     'primary key' => array('machine_name'),
   );
 
-  db_create_table('message_broker_producer', $schema['message_broker_producer']);
+  db_create_table('message_broker_producer_productions', $schema['message_broker_producer_productions']);
 }

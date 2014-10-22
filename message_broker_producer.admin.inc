@@ -214,7 +214,7 @@ function message_broker_producer_production_list() {
   $header = array('Production Name', 'Queues', 'Routing Key', 'Status', 'Last Updated');
   $productions = array();
 
-  $query = db_select('message_broker_producer', 'mbp', array('target' => 'slave'))
+  $query = db_select('message_broker_producer_productions', 'mbp', array('target' => 'slave'))
     ->orderBy('machine_name')
     ->fields('mbp');
   $result = $query->execute();
@@ -317,7 +317,7 @@ function message_broker_producer_production_options_form($form, &$form_submit, $
 
     $production_name = $target_production;
     // Lookup production details to display in form while in edit state
-    $query = db_select('message_broker_producer', 'mbp', array('target' => 'slave'))
+    $query = db_select('message_broker_producer_productions', 'mbp', array('target' => 'slave'))
       ->fields('mbp', array('config', 'routing_key', 'status', 'updated'))
       ->condition('mbp.machine_name', $production_name, '=');
     $record = $query->execute()
@@ -534,7 +534,7 @@ function message_broker_producer_production_options_form_submit($form, &$form_st
     $routing_key = check_plain($form_state['values']['message_broker_producer_routing_key']);
     $status = check_plain($form_state['values']['message_broker_producer_status']);
 
-    db_update('message_broker_producer')
+    db_update('message_broker_producer_productions')
       ->fields(array(
         'machine_name' => $production_name,
         'config' => $selected_exchange_config,
@@ -566,7 +566,7 @@ function message_broker_producer_production_options_form_submit($form, &$form_st
     $routing_key = '';
     $status = 0;
 
-    $db_status = db_insert('message_broker_producer')
+    $db_status = db_insert('message_broker_producer_productions')
       ->fields(array(
         'machine_name' => $production_name,
         'config' => $selected_exchange_config,
