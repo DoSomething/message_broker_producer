@@ -84,7 +84,7 @@ function message_broker_producer_menu() {
     'weight' => 9,
   );
   $items['admin/config/services/message-broker-producer/add-edit-production'] = array(
-    'title' => 'Production Options',
+    'title' => 'Add/Edit Production',
     'description' => 'List of production items and their related settings.',
     'type' => MENU_LOCAL_TASK,
     'page callback' => 'drupal_get_form',
@@ -96,13 +96,23 @@ function message_broker_producer_menu() {
   );
   $items['admin/config/services/message-broker-producer/add-edit-production/%'] = array(
     'title' => 'Production Options',
-    'description' => 'Administer production items and their related settings.',
+    'description' => 'Administer production item.',
     'page callback' => 'message_broker_producer_production_options_update',
     'page arguments' => array(5),
     'access arguments' => array('administer message_broker_producer'),
     'file' => 'message_broker_producer.admin.inc',
     'file path' => drupal_get_path('module', 'message_broker_producer'),
     'weight' => 11,
+  );
+  $items['admin/config/services/message-broker-producer/add-edit-production/%/%'] = array(
+    'title' => 'Production Options',
+    'description' => 'Administer production item, queue reset.',
+    'page callback' => 'message_broker_producer_production_options_update',
+    'page arguments' => array(5, 6),
+    'access arguments' => array('administer message_broker_producer'),
+    'file' => 'message_broker_producer.admin.inc',
+    'file path' => drupal_get_path('module', 'message_broker_producer'),
+    'weight' => 12,
   );
   $items['admin/config/services/message-broker-producer/mq-settings'] = array(
     'title' => 'RabbitMQ Settings',
