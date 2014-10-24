@@ -198,15 +198,7 @@ function message_broker_producer_status() {
   }
 
   // Test link to produce transactionals queue entry
-  $test_links['all'] = 'Generate ' . l('test producer entry', 'admin/config/services/message-broker-producer/test') . '.';
-
   $test_links['campaign-signup'] = 'Generate ' . l('test campaign_signup producer entry', 'admin/config/services/message-broker-producer/test/campaign_signup') . '.';
-  $test_links['campaign-reportback'] = 'Generate ' . l('test campaign_reportback producer entry', 'admin/config/services/message-broker-producer/test/campaign_reportback') . '.';
-  $test_links['user-password'] = 'Generate ' . l('test user_password producer entry', 'admin/config/services/message-broker-producer/test/user_password') . '.';
-  $test_links['user-register'] = 'Generate ' . l('test user_register producer entry', 'admin/config/services/message-broker-producer/test/user_register') . '.';
-  $test_links['user-register-under'] = 'Generate ' . l('test user_register_under producer entry', 'admin/config/services/message-broker-producer/test/user_register_under') . '.';
-  $test_links['campaign-signup-noname'] = 'Generate ' . l('test campaign_signup_noname producer entry', 'admin/config/services/message-broker-producer/test/campaign_signup_noname') . '.';
-  $test_links['campaign-reportback-noname'] = 'Generate ' . l('test campaign_reportback_noname producer entry', 'admin/config/services/message-broker-producer/test/campaign_reportback_noname') . '.';
 
   return theme('message_broker_producer_status',
                 array(
@@ -232,9 +224,9 @@ function message_broker_producer_production_list() {
 
   $productions = array();
 
-  $query = db_select('message_broker_producer_productions', 'mbp', array('target' => 'slave'))
+  $query = db_select('message_broker_producer_productions', 'mbpp', array('target' => 'slave'))
     ->orderBy('machine_name')
-    ->fields('mbp');
+    ->fields('mbpp');
   $result = $query->execute();
 
   // Build each row of the table
