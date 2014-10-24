@@ -293,6 +293,7 @@ function message_broker_producer_test($production = NULL) {
         'STEP_THREE' => 'Step Three',
       ),
     );
+    // @todo: Add automated generation of production entry for test request to call.
     message_broker_producer_request('transactional-campaign_signup', $payload);
   }
 
