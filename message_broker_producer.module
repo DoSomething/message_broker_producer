@@ -175,11 +175,12 @@ function message_broker_producer_permission() {
  * @param array $param
  *   An option associative array of parameters.
  */
-function message_broker_producer_request($productionType = '', $param = array()) {
+function message_broker_producer_request($production = '', $param = array()) {
 
   $library = libraries_load('messagebroker-phplib');
   if (!empty($library['loaded'])) {
-    if (!empty($productionType)) {
+
+    if (!empty($production)) {
 
       // Add 'activity_timestamp' and 'application_id' to all $param.
       $param['activity_timestamp'] = time();
@@ -192,131 +193,67 @@ function message_broker_producer_request($productionType = '', $param = array())
         return;
       }
 
-      $credentials = array(
-        'host' => variable_get('message_broker_producer_rabbitmq_host', 'localhost'),
-        'port' => variable_get('message_broker_producer_rabbitmq_port', '5672'),
-        'username' => variable_get('message_broker_producer_rabbitmq_username', 'guest'),
-        'password' => variable_get('message_broker_producer_rabbitmq_password', 'guest'),
-        'vhost' => variable_get('message_broker_producer_rabbitmq_vhost', ''),
-      );
+      $query = db_select('message_broker_producer_productions', 'mbpp', array('target' => 'slave'))
+        ->fields('mbpp')
+        ->condition('mbpp.machine_name', $production, '=')
+        ->condition('mbpp.status', 1, '=');
+      $num_of_results = $query->execute()->rowCount();
+      $record = $query->execute()
+        ->fetchObject();
 
-      // Supported methods - produceTransactional, cacheCampaign.
-      if ($productionType == 'produceTransactional') {
+      if ( $num_of_results > 0) {
 
-        // Determine routingKey based on activity define in $param.
-        switch ($param['activity']) {
-          case 'campaign_signup':
-          case 'campaign_group_signup':
-            $routing_key = 'campaign.signup.transactional';
-            break;
+        $production_settings = unserialize($record->config);
 
-          case 'campaign_reportback':
-            $routing_key = 'campaign.campaign_reportback.transactional';
-            break;
-
-          case 'user_password':
-            $routing_key = 'user.password_reset.transactional';
-            break;
-
-          case 'user_register':
-            $routing_key = 'user.registration.transactional';
-            break;
-
-          default:
-            throw new Exception('Undefined activity "' . $param->activity .
-              '" sent to produceTransactional in messagebroker-phplib.');
-        }
-
+        $credentials = array(
+          'host' => variable_get('message_broker_producer_rabbitmq_host', 'localhost'),
+          'port' => variable_get('message_broker_producer_rabbitmq_port', '5672'),
+          'username' => variable_get('message_broker_producer_rabbitmq_username', 'guest'),
+          'password' => variable_get('message_broker_producer_rabbitmq_password', 'guest'),
+          'vhost' => variable_get('message_broker_producer_rabbitmq_vhost', ''),
+        );
         $config = array(
           'exchange' => array(
-            'name' => variable_get('message_broker_producer_exchange_transactional_name', 'transactionalExchange'),
-            'type' => variable_get('message_broker_producer_exchange_transactional_type', 'topic'),
-            'passive' => variable_get('message_broker_producer_exchange_transactional_passive', 0),
-            'durable' => variable_get('message_broker_producer_exchange_transactional_durable', 1),
-            'auto_delete' => variable_get('message_broker_producer_exchange_transactional_auto_delete', 0),
+            'name' => $production_settings->name,
+            'type' => $production_settings->type,
+            'passive' => $production_settings->passive,
+            'durable' => $production_settings->durable,
+            'auto_delete' => $production_settings->auto_delete,
           ),
-          'queue' => array(
-            'registrations' => array(
-              'name' => variable_get('message_broker_producer_queue_registrations_name', 'userRegistrationQueue'),
-              'passive' => variable_get('message_broker_producer_queue_registrations_passive', 0),
-              'durable' => variable_get('message_broker_producer_queue_registrations_durable', 1),
-              'exclusive' => variable_get('message_broker_producer_queue_registrations_exclusive', 0),
-              'auto_delete' => variable_get('message_broker_producer_queue_registrations_auto_delete', 0),
-              'bindingKey' => variable_get('message_broker_producer_queue_registrations_binding_key', 'user.registration.*'),
-            ),
-            'campaign_signups' => array(
-              'name' => variable_get('message_broker_producer_queue_campaign_signups_name', 'mailchimpCampaignSignupQueue'),
-              'passive' => variable_get('message_broker_producer_queue_campaign_signups_passive', 0),
-              'durable' => variable_get('message_broker_producer_queue_campaign_signups_durable', 1),
-              'exclusive' => variable_get('message_broker_producer_queue_campaign_signups_exclusive', 0),
-              'auto_delete' => variable_get('message_broker_producer_queue_campaign_signups_auto_delete', 0),
-              'bindingKey' => variable_get('message_broker_producer_queue_campaign_signups_binding_key', 'campaign.signup.*'),
-            ),
-            'transactional' => array(
-              'name' => variable_get('message_broker_producer_queue_transactional_name', 'transactionalQueue'),
-              'passive' => variable_get('message_broker_producer_queue_transactional_passive', 0),
-              'durable' => variable_get('message_broker_producer_queue_transactional_durable', 1),
-              'exclusive' => variable_get('message_broker_producer_queue_transactional_exclusive', 0),
-              'auto_delete' => variable_get('message_broker_producer_queue_transactional_auto_delete', 0),
-              'bindingKey' => variable_get('message_broker_producer_queue_transactional_binding_key', '*.*.transactional'),
-            ),
-            'userAPIRegistration' => array(
-              'name' => variable_get('message_broker_producer_queue_user_API_registration_name', 'userAPIRegistrationQueue'),
-              'passive' => variable_get('message_broker_producer_queue_user_API_registration_passive', 0),
-              'durable' => variable_get('message_broker_producer_queue_user_API_registration_durable', 1),
-              'exclusive' => variable_get('message_broker_producer_queue_user_API_registration_exclusive', 0),
-              'auto_delete' => variable_get('message_broker_producer_queue_user_API_registration_auto_delete', 0),
-              'bindingKey' => variable_get('message_broker_producer_queue_user_API_registration_binding_key', 'user.registration.#'),
-            ),
-            'userAPICampaignActivity' => array(
-              'name' => variable_get('message_broker_producer_queue_user_API_campaign_activity_name', 'userAPICampaignActivityQueue'),
-              'passive' => variable_get('message_broker_producer_queue_user_API_campaign_activity_passive', 0),
-              'durable' => variable_get('message_broker_producer_queue_user_API_campaign_activity_durable', 1),
-              'exclusive' => variable_get('message_broker_producer_queue_user_API_campaign_activity_exclusive', 0),
-              'auto_delete' => variable_get('message_broker_producer_queue_user_API_campaign_activity_auto_delete', 0),
-              'bindingKey' => variable_get('message_broker_producer_queue_user_API_campaign_activity_binding_key', 'campaign.*.*'),
-            ),
-            'activityStats' => array(
-              'name' => variable_get('message_broker_producer_queue_activity_stats_name', 'activityStatsQueue'),
-              'passive' => variable_get('message_broker_producer_queue_activity_stats_passive', 0),
-              'durable' => variable_get('message_broker_producer_queue_activity_stats_durable', 1),
-              'exclusive' => variable_get('message_broker_producer_queue_activity_stats_exclusive', 1),
-              'auto_delete' => variable_get('message_broker_producer_queue_activity_stats_auto_delete', 0),
-              'bindingKey' => variable_get('message_broker_producer_queue_activity_stats_binding_key', '*.*.transactional'),
-            ),
-            'logging' => array(
-              'name' => variable_get('message_broker_producer_queue_logging_name', 'loggingQueue'),
-              'passive' => variable_get('message_broker_producer_queue_logging_passive', 0),
-              'durable' => variable_get('message_broker_producer_queue_logging_durable', 1),
-              'exclusive' => variable_get('message_broker_producer_queue_logging_exclusive', 1),
-              'auto_delete' => variable_get('message_broker_producer_queue_logging_auto_delete', 0),
-              'bindingKey' => variable_get('message_broker_producer_queue_logging_binding_key', '*.*.transactional'),
-            ),
-          ),
-          'routingKey' => $routing_key,
+          'routingKey' => $record->routing_key,
         );
 
-      }
-      else {
-        drupal_set_message('Unsupported method "' . $method . '" sent to  message_broker_producer_request()', 'error');
-        return;
-      }
+        foreach ($production_settings->queues as $production_queue => $queue) {
 
-      try {
-        $messageBroker = new MessageBroker($credentials, $config);
-        $message = serialize($param);
-        $messageBroker->publishMessage($message);
-        return;
-      }
-      catch (Exception $e) {
-        drupal_set_message('Failed to create MessageBroker library (messagebroker-phplib) instance. Check configuration settings in ' . l(t('administration interface'), 'admin/config/services/message-broker-producer/mq-settings') . '.', 'error');
+          $config['queue'][$production_queue] = array(
+            'name' => $production_queue,
+            'passive' => $queue->passive,
+            'durable' => $queue->durable,
+            'exclusive' => $queue->exclusive,
+            'auto_delete' => $queue->auto_delete,
+            'bindingKey' => $queue->binding_pattern,
+          );
+
+        }
+
+        try {
+          $messageBroker = new MessageBroker($credentials, $config);
+          $message = serialize($param);
+          $messageBroker->publishMessage($message);
+          return;
+        }
+        catch (Exception $e) {
+          drupal_set_message('Failed to create MessageBroker library (messagebroker-phplib) instance. Check configuration settings in ' . l(t('administration interface'), 'admin/config/services/message-broker-producer/mq-settings') . '.', 'error');
+        }
+
       }
 
     }
     else {
-      drupal_set_message('The intended method for message_broker_producer_request() must be defined.', 'error');
+      drupal_set_message('The "production" for message_broker_producer_request() must be defined.', 'error');
       return;
     }
+
   }
   else {
     drupal_set_message('Failed to load messagebroker-phplib library.', 'error');
@@ -338,9 +275,9 @@ function message_broker_producer_request($productionType = '', $param = array())
  * @param string $action
  *   The type of test action / transaction to submit.
  */
-function message_broker_producer_test($action = NULL) {
+function message_broker_producer_test($production = NULL) {
 
-  if (empty($action) || $action == 'campaign_signup' || $action == 1) {
+  if (empty($action) || $production == 'campaign_signup' || $action == 1) {
     $payload = array(
       'activity' => 'campaign_signup',
       'email' => 'dlee+messagebroker-test-campaign-signup' . rand(1, 99) . '@dosomething.org',
@@ -356,96 +293,7 @@ function message_broker_producer_test($action = NULL) {
         'STEP_THREE' => 'Step Three',
       ),
     );
-    message_broker_producer_request('produceTransactional', $payload);
-  }
-  if (empty($action) || $action == 'campaign_reportback' || $action == 2) {
-    $payload = array(
-      'activity' => 'campaign_reportback',
-      'email' => 'dlee+messagebroker-test-campaign-reportback' . rand(1, 99) . '@dosomething.org',
-      'uid' => '22229',
-      'event_id' => '99992',
-      'mailchimp_grouping_id' => '10637',
-      'mailchimp_group_name' => 'PBJamSlam2014',
-      'merge_vars' => array(
-        'FNAME' => 'First-Name',
-        'CAMPAIGN_TITLE' => 'Campaign Title',
-        'IMPACT_VERB' => 'Impact Verb',
-        'IMPACT_NUMBER' => 'Impact Number',
-        'IMPACT_NOUN' => 'Impact Noun',
-      ),
-    );
-    message_broker_producer_request('produceTransactional', $payload);
-  }
-  if (empty($action) || $action == 'user_password' || $action == 3) {
-    $payload = array(
-      'activity' => 'user_password',
-      'email' => 'dlee+messagebroker-test-user-password' . rand(1, 99) . '@dosomething.org',
-      'uid' => '33339',
-      'merge_vars' => array(
-        'FNAME' => 'First-Name',
-        'USERNAME' => 'UserName',
-        'RESET_LINK' => 'http://some-reset-link.info',
-      ),
-    );
-    message_broker_producer_request('produceTransactional', $payload);
-  }
-  if (empty($action) || $action == 'user_register' || $action == 4) {
-    $payload = array(
-      'activity' => 'user_register',
-      'email' => 'dlee+messagebroker-test-user-register-over' . rand(1, 99) . '@dosomething.org',
-      'uid' => '44449',
-      'birthdate' => 929232000,  /* 13 June 1999 (over 13) */
-      'merge_vars' => array(
-        'FNAME' => 'First-Name',
-      ),
-    );
-    message_broker_producer_request('produceTransactional', $payload);
-  }
-  if (empty($action) || $action == 'user_register_under' || $action == 5) {
-    $payload = array(
-      'activity' => 'user_register',
-      'email' => 'dlee+messagebroker-test-user-register-under' . rand(1, 99) . '@dosomething.org',
-      'uid' => '44449',
-      'birthdate' => 1087084800,  /* 13 June 2004 (under 13) */
-      'merge_vars' => array(
-        'FNAME' => 'First-Name',
-      ),
-    );
-    message_broker_producer_request('produceTransactional', $payload);
-  }
-  if (empty($action) || $action == 'campaign_signup_noname' || $action == 6) {
-    $payload = array(
-      'activity' => 'campaign_signup',
-      'email' => 'dlee+messagebroker-test-campaign-signup-noname' . rand(1, 99) . '@dosomething.org',
-      'uid' => '11119',
-      'event_id' => '99991',
-      'merge_vars' => array(
-        'FNAME' => '',
-        'CAMPAIGN_TITLE' => 'Campaign Title',
-        'CAMPAIGN_LINK' => 'http://campaign-link.org',
-        'CALL_TO_ACTION' => 'Call To Action',
-        'STEP_ONE' => 'Step One',
-        'STEP_TWO' => 'Step Two',
-        'STEP_THREE' => 'Step Three',
-      ),
-    );
-    message_broker_producer_request('produceTransactional', $payload);
-  }
-  if (empty($action) || $action == 'campaign_reportback_noname' || $action == 7) {
-    $payload = array(
-      'activity' => 'campaign_reportback',
-      'email' => 'dlee+messagebroker-test-campaign-reportback-noname' . rand(1, 99) . '@dosomething.org',
-      'uid' => '22229',
-      'event_id' => '99992',
-      'merge_vars' => array(
-        'FNAME' => '',
-        'CAMPAIGN_TITLE' => 'Campaign Title',
-        'IMPACT_VERB' => 'Impact Verb',
-        'IMPACT_NUMBER' => 'Impact Number',
-        'IMPACT_NOUN' => 'Impact Noun',
-      ),
-    );
-    message_broker_producer_request('produceTransactional', $payload);
+    message_broker_producer_request('transactional-campaign_signup', $payload);
   }
 
 }
@@ -456,13 +304,13 @@ function message_broker_producer_test($action = NULL) {
  * message_broker_producer_test() can be
  * called from both the admin UI as a link and a Drush command.
  *
- * @param string $action
- *   The type of test action / transaction to submit.
+ * @param string $production
+ *   The type of test production to submit.
  */
-function message_broker_producer_test_page($action = NULL) {
+function message_broker_producer_test_page($production = NULL) {
 
-  message_broker_producer_test($action);
+  message_broker_producer_test($production);
 
-  drupal_set_message('Producer ' . $action . ' test sent.', 'status');
+  drupal_set_message('Production "' . $production . '" test sent.', 'status');
   drupal_goto('admin/config/services/message-broker-producer/status');
 }

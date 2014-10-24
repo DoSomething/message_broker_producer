@@ -81,6 +81,12 @@ function message_broker_producer_status() {
 
   $rabbit_username = variable_get('message_broker_producer_rabbitmq_username', 'guest');
   $rabbit_password = variable_get('message_broker_producer_rabbitmq_password', 'guest');
+  $rabbit_vhost = variable_get('message_broker_producer_rabbitmq_vhost', '%2F');
+
+  // Ensure empty vhost setting reverts to "%2F"
+  if ($rabbit_vhost == '') {
+    $rabbit_vhost = '%2F';
+  }
 
   $ch = curl_init();
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
@@ -99,15 +105,31 @@ function message_broker_producer_status() {
   curl_setopt($ch, CURLOPT_TIMEOUT, MQ_EXECUTE_TIMEOUT);
 
   $rabbit_management_api_urls = array(
-    'api-aliveness-test' => variable_get('message_broker_producer_rabbitmq_host', 'localhost') .':15672/api/aliveness-test/' . variable_get('message_broker_producer_rabbitmq_vhost', '%2F'),
-    'api-vhosts' => variable_get('message_broker_producer_rabbitmq_host', 'localhost') .':15672/api/vhosts',
-    'api-overview' => variable_get('message_broker_producer_rabbitmq_host', 'localhost') .':15672/api/overview',
+    'api-aliveness-test' => variable_get('message_broker_producer_rabbitmq_host', 'localhost') .':15672/api/aliveness-test/' . $rabbit_vhost,
+    'api-vhosts' => variable_get('message_broker_producer_rabbitmq_host', 'localhost') .':15672/api/vhosts/',
+    'api-overview' => variable_get('message_broker_producer_rabbitmq_host', 'localhost') .':15672/api/overview/',
   );
 
   foreach ($rabbit_management_api_urls as $call => $rabbit_management_api_url) {
+
     curl_setopt($ch, CURLOPT_URL, $rabbit_management_api_url);
     $jsonResult = curl_exec($ch);
     $results = json_decode($jsonResult);
+
+    // Management API connection failed, report error, no need to test further
+    if (!$results) {
+      drupal_set_message("No results for call to API '$call', " . 'check the
+        connection to the Message Broker server. Is the VPN connection working
+        or perhaps review the ' . l('RabbitMQ settings', 'admin/config/services/message-broker-producer/mq-settings') . '.', 'error');
+      return theme('message_broker_producer_status',
+        array('status' => '', 'vhosts' => '', 'overview' => '', 'test_links' => ''));
+    }
+    elseif (isset($results->error)) {
+      drupal_set_message('Managment API call: ' . $call . ' reported "<strong>' . $results->reason . '</strong>". Is the VPN connection working
+        or perhaps review the ' . l('RabbitMQ settings', 'admin/config/services/message-broker-producer/mq-settings') . '.', 'error');
+      return theme('message_broker_producer_status',
+        array('status' => '', 'vhosts' => '', 'overview' => '', 'test_links' => ''));
+    }
 
     switch ($call) {
       case 'api-aliveness-test':
@@ -173,11 +195,6 @@ function message_broker_producer_status() {
         break;
     }
 
-    if (!$results) {
-      drupal_set_message("No results for call to API '$call', " .
-                          'check the connection to the Message Broker server.',
-                          'error');
-    }
   }
 
   // Test link to produce transactionals queue entry
@@ -215,9 +232,9 @@ function message_broker_producer_production_list() {
 
   $productions = array();
 
-  $query = db_select('message_broker_producer_productions', 'mbp', array('target' => 'slave'))
+  $query = db_select('message_broker_producer_productions', 'mbpp', array('target' => 'slave'))
     ->orderBy('machine_name')
-    ->fields('mbp');
+    ->fields('mbpp');
   $result = $query->execute();
 
   // Build each row of the table
@@ -610,7 +627,7 @@ function message_broker_producer_delete_confirm($form, &$form_state, $machine_na
   $heading = t('Delete');
   $cancel_path = array('path' => 'admin/config/services/message-broker-producer/list-productions');
   $caption = t('<p>Are you sure you want to delete this production?</p>'
-                . '<p>This action cannot be undone.</p>');
+    . '<p>This action cannot be undone.</p>');
   $yes = t('Delete');
   $no = t('Cancel');
 
