@@ -13,7 +13,7 @@ define ('MQ_EXECUTE_TIMEOUT', 5);
  *
  * @parm array $form
  *   Array of form elements.
- * @parm array &$form_submit
+ * @parm array &$form_state
  *   Array of the state of the form elements.
  */
 function message_broker_producer_config_form($form, &$form_state) {
@@ -286,7 +286,7 @@ function message_broker_producer_production_options_update($target_production, $
  *
  * @parm array $form
  *   Array of form elements.
- * @parm array &$form_submit
+ * @parm array &$form_state
  *   Array of the state of the form elements.
  * @parm string $target_production
  *   Update/delete of a production record, $target_production will have a value.
@@ -297,7 +297,7 @@ function message_broker_producer_production_options_update($target_production, $
  * @return
  *   $form: An array of the form elements
  */
-function message_broker_producer_production_options_form($form, &$form_submit, $target_production = NULL, $exchange_queue_reset = '') {
+function message_broker_producer_production_options_form($form, &$form_state, $target_production = NULL, $exchange_queue_reset = '') {
 
   $mb_config_settings = message_broker_producer_load_config_options();
   $exchanges[0] = '-- Select exchange --';
@@ -460,7 +460,7 @@ function message_broker_producer_production_options_form($form, &$form_submit, $
  *
  * @parm array $form
  *   Array of form elements.
- * @parm array &$form_submit
+ * @parm array &$form_state
  *   Array of the state of the form elements.
  */
 function message_broker_producer_production_options_form_validate($form, &$form_state) {
@@ -506,7 +506,7 @@ function message_broker_producer_production_options_form_validate($form, &$form_
  *
  * @parm array $form
  *   Array of form elements.
- * @parm array &$form_submit
+ * @parm array &$form_state
  *   Array of the state of the form elements.
  */
 function message_broker_producer_production_options_form_submit($form, &$form_state) {
@@ -605,7 +605,7 @@ function message_broker_producer_production_options_form_submit($form, &$form_st
  *
  * @parm array $form
  *   Array of form elements.
- * @parm array &$form_submit
+ * @parm array &$form_state
  *   Array of the state of the form elements.
  * @parm string $machine_name
  *   Machine name of production to be deleted.
@@ -631,6 +631,11 @@ function message_broker_producer_delete_confirm($form, &$form_state, $machine_na
  *
  * Deletes the production from the database, and
  * returns the user to the List Productions page.
+ *
+ * @parm array $form
+ *   Array of form elements.
+ * @parm array &$form_state
+ *   Array of the state of the form elements.
  */
 function message_broker_producer_delete_confirm_submit($form, &$form_state) {
 
@@ -660,9 +665,7 @@ function message_broker_producer_load_config_options() {
   $mb_config_library = libraries_load('messagebroker-config');
 
   if ($mb_config_library['loaded']) {
-    // $mb_config_path = $GLOBALS['base_url'] . '/' . $mb_config_library['library path'] . '/mb_config.json';
     $mb_config_path = $mb_config_library['library path'] . '/mb_config.json';
-    // $mb_config_json = file_get_contents($mb_config_path);
     $mb_config_json = implode(file($mb_config_path));
     $mb_config_settings = json_decode($mb_config_json);
     return $mb_config_settings;
