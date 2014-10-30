@@ -315,3 +315,64 @@ function message_broker_producer_test_page($production = NULL) {
   drupal_set_message('Production "' . $production . '" test sent.', 'status');
   drupal_goto('admin/config/services/message-broker-producer/status');
 }
+
+/*
+ * Programaticall submit production form opterations.
+ *
+ * The production creation form is a two step process. The initial entry is
+ * created with a selected enchange and then the entry is updated with the
+ * selected queues and routing_key.
+ *
+ * @parm string $target_production
+ *   The production entry to perform crud operations on.
+ * @parm string $action
+ *   The action to perform - "c"reate, "u"pdate.
+ * @parm array $production
+ *   The desired details of the production entry.
+ */
+function message_broker_producer_production_crud($target_production, $action, $production = '') {
+
+  switch ($action) {
+    case 'create':
+
+      // Load message_broker_producer.admin.inc to access related productions form functionality
+      module_load_include('inc', 'message_broker_producer', 'message_broker_producer.admin');
+
+      // Create the initial production entry
+      $form_state = array();
+      $form_state['values']['message_broker_producer_production_name'] = $target_production;
+      $form_state['values']['message_broker_producer_exchange'] = $production['exchange'];
+
+      drupal_form_submit('message_broker_producer_production_options_form', $form_state);
+      break;
+
+    case 'update':
+
+      module_load_include('inc', 'message_broker_producer', 'message_broker_producer.admin');
+
+      // Update the existing entry with the queue and routing key settings
+      $form_state = array();
+      $form_state['values']['message_broker_producer_production_name'] = $target_production;
+      $form_state['values']['message_broker_producer_exchange'] = $production['exchange'];
+      $form_state['values']['message_broker_producer_target'] = $target_production;
+      $form_state['values']['message_broker_producer_previous_exchange'] = $production['exchange'];
+      $mb_config_settings = message_broker_producer_load_config_options();
+      $previous_config = $mb_config_settings->rabbit->exchanges->$production['exchange'];
+      foreach($mb_config_settings->rabbit->exchanges->$production['exchange']->queues as $queue) {
+        $form_state['values']['message_broker_producer_queue_' . $queue->name] = NULL;
+      }
+      $form_state['values']['message_broker_producer_previous_config'] = $previous_config;
+      foreach($production['queues'] as $queue) {
+        $form_state['values']['message_broker_producer_queue_' . $queue] = 1;
+      }
+      $form_state['values']['message_broker_producer_routing_key'] = $production['routing_key'];
+      $form_state['values']['message_broker_producer_status'] = $production['status'];
+
+      drupal_form_submit('message_broker_producer_production_options_form', $form_state, $target_production, $queue_reset);
+      break;
+
+  }
+
+  return;
+
+}

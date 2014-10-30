@@ -574,7 +574,6 @@ function message_broker_producer_production_options_form_submit($form, &$form_st
     $selected_exchange_config = '';
     foreach($mb_config_settings->rabbit->exchanges as $exchange_index => $exchange) {
       if ($exchange_index == $selected_exchange) {
-        // @todo: remove / add queues in config based on selected queues, defaults to all in config file
         $selected_exchange_config = serialize($exchange);
         break;
       }
