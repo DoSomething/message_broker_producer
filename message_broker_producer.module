@@ -373,6 +373,4 @@ function message_broker_producer_production_crud($target_production, $action, $p
 
   }
 
-  return;
-
 }
