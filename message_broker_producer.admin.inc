@@ -517,6 +517,9 @@ function message_broker_producer_production_options_form_submit($form, &$form_st
   // "target" is set, update production entry rather than create new entry
   if ($form_state['values']['message_broker_producer_target'] != NULL) {
 
+    // production entry is being updated, redirect user back to production listings when done
+    $form_state['redirect'] = 'admin/config/services/message-broker-producer/list-productions';
+
     // Check for change in exchange, reload queues from config if changed
     if ($form_state['values']['message_broker_producer_previous_exchange'] == $selected_exchange) {
 
@@ -564,9 +567,13 @@ function message_broker_producer_production_options_form_submit($form, &$form_st
       ->execute();
 
     drupal_set_message('The ' . $form_state['values']['message_broker_producer_production_name'] . ' production type has been updated.', 'notice');
-    drupal_goto('admin/config/services/message-broker-producer/list-productions');
   }
   else {
+
+    // New production entry, return user to the production form in  the edit
+    // state to complete configuration settings based on the initial exchange
+    // seleciton.
+    $form_state['redirect'] = 'admin/config/services/message-broker-producer/add-edit-production/' . $production_name;
 
     // Gather settings for selected exchange
     $mb_config_settings = message_broker_producer_load_config_options();
@@ -594,9 +601,9 @@ function message_broker_producer_production_options_form_submit($form, &$form_st
       ->execute();
 
     drupal_set_message('The ' . $form_state['values']['message_broker_producer_production_name'] . ' production type has been created. Complete production settings by defining the routing key value and optionally adjusting what queues the production should distribute messages to.', 'notice');
-    drupal_goto('admin/config/services/message-broker-producer/add-edit-production/' . $production_name);
   }
 
+  return;
 }
 
 /**
@@ -653,7 +660,7 @@ function message_broker_producer_delete_confirm_submit($form, &$form_state) {
       'error');
   }
 
-  drupal_goto('admin/config/services/message-broker-producer/list-productions');
+  $form_state['redirect'] = 'admin/config/services/message-broker-producer/list-productions';
 }
 
 /**
