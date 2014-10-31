@@ -521,7 +521,7 @@ function message_broker_producer_production_options_form_submit($form, &$form_st
     // state to complete configuration settings based on the initial exchange
     // selection.
     $form_state['redirect'] = 'admin/config/services/message-broker-producer/add-edit-production/' . $production_name;
-    message_broker_producer_production_insert($production_name, $selected_exchange);
+    message_broker_producer_production_insert(array('machine_name' => $production_name, 'exchange' => $selected_exchange));
 
     drupal_set_message('The ' . $form_state['values']['message_broker_producer_production_name'] . ' production type has been created. Complete production settings by defining the routing key value and optionally adjusting what queues the production should distribute messages to.', 'notice');
   }
