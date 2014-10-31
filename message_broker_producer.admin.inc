@@ -13,7 +13,7 @@ define ('MQ_EXECUTE_TIMEOUT', 5);
  *
  * @parm array $form
  *   Array of form elements.
- * @parm array &$form_submit
+ * @parm array &$form_state
  *   Array of the state of the form elements.
  */
 function message_broker_producer_config_form($form, &$form_state) {
@@ -125,7 +125,7 @@ function message_broker_producer_status() {
         array('status' => '', 'vhosts' => '', 'overview' => '', 'test_links' => ''));
     }
     elseif (isset($results->error)) {
-      drupal_set_message('Managment API call: ' . $call . ' reported "<strong>' . $results->reason . '</strong>". Is the VPN connection working
+      drupal_set_message('Management API call: ' . $call . ' reported "<strong>' . $results->reason . '</strong>". Is the VPN connection working
         or perhaps review the ' . l('RabbitMQ settings', 'admin/config/services/message-broker-producer/mq-settings') . '.', 'error');
       return theme('message_broker_producer_status',
         array('status' => '', 'vhosts' => '', 'overview' => '', 'test_links' => ''));
@@ -212,7 +212,7 @@ function message_broker_producer_status() {
 /*
  * List production entries in the message_broker_producer database table.
  *
- * A production entry defines the exahange(s) and queue(s) that a message is
+ * A production entry defines the exchange(s) and queue(s) that a message is
  * sent to and how it's distributed to the the queues.
  *
  * @return
@@ -264,7 +264,7 @@ function message_broker_producer_production_list() {
  *
  * @parm string $target_production
  *   Update/delete of a production record, $target_production will have a value.
- * @parm boolesn $queue_reset
+ * @parm boolean $queue_reset
  *   Trigger reset of select queues, reload from config file based on selected
  *   exchange supplied in parameter.
  *
@@ -286,18 +286,18 @@ function message_broker_producer_production_options_update($target_production, $
  *
  * @parm array $form
  *   Array of form elements.
- * @parm array &$form_submit
+ * @parm array &$form_state
  *   Array of the state of the form elements.
  * @parm string $target_production
  *   Update/delete of a production record, $target_production will have a value.
- * @parm boolesn $exchange_queue_reset
+ * @parm boolean $exchange_queue_reset
  *   Trigger reset of select queues, reload from config file based on selected
  *   exchange supplied in parameter.
  *
  * @return
  *   $form: An array of the form elements
  */
-function message_broker_producer_production_options_form($form, &$form_submit, $target_production = NULL, $exchange_queue_reset = '') {
+function message_broker_producer_production_options_form($form, &$form_state, $target_production = NULL, $exchange_queue_reset = '') {
 
   $mb_config_settings = message_broker_producer_load_config_options();
   $exchanges[0] = '-- Select exchange --';
@@ -351,7 +351,7 @@ function message_broker_producer_production_options_form($form, &$form_submit, $
       '#weight' => 70,
     );
 
-    // Reset assigned queues, relead from config file rather than load from
+    // Reset assigned queues, reload from config file rather than load from
     // config value in database record for production entry.
     if (isset($exchange_queue_reset) && $exchange_queue_reset != '') {
       $production_config->queues = $mb_config_settings->rabbit->exchanges->$exchange_queue_reset->queues;
@@ -460,7 +460,7 @@ function message_broker_producer_production_options_form($form, &$form_submit, $
  *
  * @parm array $form
  *   Array of form elements.
- * @parm array &$form_submit
+ * @parm array &$form_state
  *   Array of the state of the form elements.
  */
 function message_broker_producer_production_options_form_validate($form, &$form_state) {
@@ -506,7 +506,7 @@ function message_broker_producer_production_options_form_validate($form, &$form_
  *
  * @parm array $form
  *   Array of form elements.
- * @parm array &$form_submit
+ * @parm array &$form_state
  *   Array of the state of the form elements.
  */
 function message_broker_producer_production_options_form_submit($form, &$form_state) {
@@ -515,7 +515,20 @@ function message_broker_producer_production_options_form_submit($form, &$form_st
   $selected_exchange = check_plain($form_state['values']['message_broker_producer_exchange']);
 
   // "target" is set, update production entry rather than create new entry
-  if ($form_state['values']['message_broker_producer_target'] != NULL) {
+  if ($form_state['values']['message_broker_producer_target'] == NULL) {
+
+    // New production entry, return user to the production form in  the edit
+    // state to complete configuration settings based on the initial exchange
+    // selection.
+    $form_state['redirect'] = 'admin/config/services/message-broker-producer/add-edit-production/' . $production_name;
+    message_broker_producer_production_insert(array('machine_name' => $production_name, 'exchange' => $selected_exchange));
+
+    drupal_set_message('The ' . $form_state['values']['message_broker_producer_production_name'] . ' production type has been created. Complete production settings by defining the routing key value and optionally adjusting what queues the production should distribute messages to.', 'notice');
+  }
+  else {
+
+    // production entry is being updated, redirect user back to production listings when done
+    $form_state['redirect'] = 'admin/config/services/message-broker-producer/list-productions';
 
     // Check for change in exchange, reload queues from config if changed
     if ($form_state['values']['message_broker_producer_previous_exchange'] == $selected_exchange) {
@@ -564,40 +577,9 @@ function message_broker_producer_production_options_form_submit($form, &$form_st
       ->execute();
 
     drupal_set_message('The ' . $form_state['values']['message_broker_producer_production_name'] . ' production type has been updated.', 'notice');
-    drupal_goto('admin/config/services/message-broker-producer/list-productions');
-  }
-  else {
-
-    // Gather settings for selected exchange
-    $mb_config_settings = message_broker_producer_load_config_options();
-
-    $selected_exchange_config = '';
-    foreach($mb_config_settings->rabbit->exchanges as $exchange_index => $exchange) {
-      if ($exchange_index == $selected_exchange) {
-        // @todo: remove / add queues in config based on selected queues, defaults to all in config file
-        $selected_exchange_config = serialize($exchange);
-        break;
-      }
-    }
-
-    // Form fields not displayed for production add, set default values for db_insert
-    $routing_key = '';
-    $status = 0;
-
-    $db_status = db_insert('message_broker_producer_productions')
-      ->fields(array(
-        'machine_name' => $production_name,
-        'config' => $selected_exchange_config,
-        'routing_key' => $routing_key,
-        'status' => $status,
-        'updated' => time(),
-      ))
-      ->execute();
-
-    drupal_set_message('The ' . $form_state['values']['message_broker_producer_production_name'] . ' production type has been created. Complete production settings by defining the routing key value and optionally adjusting what queues the production should distribute messages to.', 'notice');
-    drupal_goto('admin/config/services/message-broker-producer/add-edit-production/' . $production_name);
   }
 
+  return;
 }
 
 /**
@@ -605,7 +587,7 @@ function message_broker_producer_production_options_form_submit($form, &$form_st
  *
  * @parm array $form
  *   Array of form elements.
- * @parm array &$form_submit
+ * @parm array &$form_state
  *   Array of the state of the form elements.
  * @parm string $machine_name
  *   Machine name of production to be deleted.
@@ -631,6 +613,11 @@ function message_broker_producer_delete_confirm($form, &$form_state, $machine_na
  *
  * Deletes the production from the database, and
  * returns the user to the List Productions page.
+ *
+ * @parm array $form
+ *   Array of form elements.
+ * @parm array &$form_state
+ *   Array of the state of the form elements.
  */
 function message_broker_producer_delete_confirm_submit($form, &$form_state) {
 
@@ -649,26 +636,5 @@ function message_broker_producer_delete_confirm_submit($form, &$form_state) {
       'error');
   }
 
-  drupal_goto('admin/config/services/message-broker-producer/list-productions');
-}
-
-/**
- * Load mb_config.json from library and format as PHP object.
- */
-function message_broker_producer_load_config_options() {
-
-  $mb_config_library = libraries_load('messagebroker-config');
-
-  if ($mb_config_library['loaded']) {
-    // $mb_config_path = $GLOBALS['base_url'] . '/' . $mb_config_library['library path'] . '/mb_config.json';
-    $mb_config_path = $mb_config_library['library path'] . '/mb_config.json';
-    // $mb_config_json = file_get_contents($mb_config_path);
-    $mb_config_json = implode(file($mb_config_path));
-    $mb_config_settings = json_decode($mb_config_json);
-    return $mb_config_settings;
-  }
-  else {
-    drupal_set_error('Message Broker Configuration library failed to load.', 'error');
-  }
-
+  $form_state['redirect'] = 'admin/config/services/message-broker-producer/list-productions';
 }
