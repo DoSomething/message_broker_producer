@@ -317,14 +317,12 @@ function message_broker_producer_test_page($production = NULL) {
 }
 
 /*
- * Programaticall create a production entry.
+ * Programatically create a production entry.
  *
  * @parm array $production
  *   The desired details of the production entry.
  */
 function message_broker_producer_production_create($production) {
-
-  module_load_include('inc', 'message_broker_producer', 'message_broker_producer.admin');
 
   $machine_name = $production['machine_name'];
   $exchange = $production['exchange'];
@@ -333,4 +331,87 @@ function message_broker_producer_production_create($production) {
   $status = 1;
   message_broker_producer_production_insert($machine_name, $exchange,
     $selected_queues, $routing_key, $status);
+}
+
+/**
+ * Insert new production entry into message_broker_producer_productions
+ * database table.
+ *
+ * Used from both hook_submit as well as message_broker_producer_create(). If the
+ * queue selection is undefined all queues assigned to the selected exchange will
+ * be included in the inserted record.
+ *
+ * @parm string $production_name
+ *   The unique production machine name. Used to reference production entry.
+ * @parm string $selected_exchange
+ *   The name of exchange assigned to the production entry. The value must be
+ *   present in the mb-config.json file.
+ * @parm array $selected_queues
+ *   An optional array of the queues to be assigned to the production entry.
+ * @parm string $routing_key
+ *   An optional string defining how a message sent with this production entry
+ *   will distributed between the selected queues.
+ */
+function message_broker_producer_production_insert($production_name, $selected_exchange,
+  $selected_queues = array(), $routing_key = '', $status = 0) {
+
+  // Load all Message Broker configuration settings from mb-config.json
+  $mb_config_settings = message_broker_producer_load_config_options();
+
+  // Gather the selected exchange and related queue config base values. The
+  // remainder of values loaded from mb-config.json are discarded to ensure only
+  // the reliant settings are added to the production entry.
+  $selected_exchange_config = array();
+  foreach($mb_config_settings->rabbit->exchanges as $exchange_index => $exchange) {
+    if ($exchange_index == $selected_exchange) {
+      $selected_exchange_config = $exchange;
+      break;
+    }
+  }
+
+  // Remove any queue entries loaded from mb-confir.json for the selected
+  // exchange that are not reliant to the production entry. The goal is to
+  // load as few configuration settings as possible for a production.
+
+  // $selected_queues will only have a value when this function is called from
+  // message_broker_producer_create().
+  if (count($selected_queues) > 0) {
+    foreach($selected_exchange_config->queues as $queue_name => $queue) {
+      if (!in_array($queue_name, $selected_queues)) {
+        unset($selected_exchange_config->queues->$queue_name);
+      }
+    }
+  }
+  $selected_exchange_config =  serialize($selected_exchange_config);
+
+  $db_status = db_insert('message_broker_producer_productions')
+    ->fields(array(
+      'machine_name' => $production_name,
+      'config' => $selected_exchange_config,
+      'routing_key' => $routing_key,
+      'status' => $status,
+      'updated' => time(),
+    ))
+    ->execute();
+
+  return $db_status;
+}
+
+/**
+ * Load mb_config.json from library and format as PHP object.
+ */
+function message_broker_producer_load_config_options() {
+
+  $mb_config_library = libraries_load('messagebroker-config');
+
+  if ($mb_config_library['loaded']) {
+    $mb_config_path = $mb_config_library['library path'] . '/mb_config.json';
+    $mb_config_json = implode(file($mb_config_path));
+    $mb_config_settings = json_decode($mb_config_json);
+    return $mb_config_settings;
+  }
+  else {
+    drupal_set_error('Message Broker Configuration library failed to load.', 'error');
+  }
+
 }

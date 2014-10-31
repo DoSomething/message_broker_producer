@@ -583,60 +583,6 @@ function message_broker_producer_production_options_form_submit($form, &$form_st
 }
 
 /**
- * Insert new production entry into message_broker_producer_productions
- * database table.
- *
- * Used from both hook_submit as well as message_broker_producer_create(). If the
- * queue selection is undefined all queues assigned to the selected exchange will
- * be included in the inserted record.
- *
- * @parm string $production_name
- *   The unique production machine name. Used to reference production entry.
- * @parm string $selected_exchange
- *   The name of exchange assigned to the production entry. The value must be
- *   present in the mb-config.json file.
- * @parm array $selected_queues
- *   An optional array of the queues to be assigned to the production entry.
- * @parm string $routing_key
- *   An optional string defining how a message sent with this production entry
- *   will distributed between the selected queues.
- */
-function message_broker_producer_production_insert($production_name, $selected_exchange,
-    $selected_queues = array(), $routing_key = '', $status = 0) {
-
-  // Gather settings for selected exchange
-  $mb_config_settings = message_broker_producer_load_config_options();
-
-  $selected_exchange_config = '';
-  foreach($mb_config_settings->rabbit->exchanges as $exchange_index => $exchange) {
-    if ($exchange_index == $selected_exchange) {
-      $selected_exchange_config = serialize($exchange);
-      break;
-    }
-  }
-
-  if (count($selected_queues) > 0) {
-    foreach($selected_exchange_config->queues as $queue) {
-      if (!in_array($selected_queues)) {
-        unset($selected_exchange_config->queues->$selected_queue_name);
-      }
-    }
-  }
-
-  $db_status = db_insert('message_broker_producer_productions')
-    ->fields(array(
-      'machine_name' => $production_name,
-      'config' => $selected_exchange_config,
-      'routing_key' => $routing_key,
-      'status' => $status,
-      'updated' => time(),
-    ))
-    ->execute();
-
-  return $db_status;
-}
-
-/**
  * Build a confirmation form for deleting a production.
  *
  * @parm array $form
@@ -691,23 +637,4 @@ function message_broker_producer_delete_confirm_submit($form, &$form_state) {
   }
 
   $form_state['redirect'] = 'admin/config/services/message-broker-producer/list-productions';
-}
-
-/**
- * Load mb_config.json from library and format as PHP object.
- */
-function message_broker_producer_load_config_options() {
-
-  $mb_config_library = libraries_load('messagebroker-config');
-
-  if ($mb_config_library['loaded']) {
-    $mb_config_path = $mb_config_library['library path'] . '/mb_config.json';
-    $mb_config_json = implode(file($mb_config_path));
-    $mb_config_settings = json_decode($mb_config_json);
-    return $mb_config_settings;
-  }
-  else {
-    drupal_set_error('Message Broker Configuration library failed to load.', 'error');
-  }
-
 }
