@@ -157,15 +157,15 @@ function message_broker_producer_update_7001(&$sandbox) {
 /**
  * Implements hook_update_xx().
  *
- * Delete all system variables related to the previous version
+ * Delete all system variables related to the previous version. Create message_broker_producer_productions database table.
  */
 function message_broker_producer_update_7002(&$sandbox) {
 
-  // Remove all message_broker_producer settings in the variable table except the rabbitmq config details.
+  // Remove all message_broker_producer settings in the variable table.
   $cleanup_status = (bool) db_delete('variable')
     ->condition('name', '%message_broker_producer_%', 'LIKE')
     ->condition('name', '%message_broker_producer_rabbitmq_%', 'NOT LIKE')
-    ->condition('name', 'message_broker_producer_application_id', !=)
+    ->condition('name', 'message_broker_producer_application_id', '!=')
     ->execute();
 
   if ($cleanup_status == TRUE) {
