@@ -161,9 +161,11 @@ function message_broker_producer_update_7001(&$sandbox) {
  */
 function message_broker_producer_update_7002(&$sandbox) {
 
-  // Remove all message_broker_producer settings in the variable table.
+  // Remove all message_broker_producer settings in the variable table except the rabbitmq config details.
   $cleanup_status = (bool) db_delete('variable')
     ->condition('name', '%message_broker_producer_%', 'LIKE')
+    ->condition('name', '%message_broker_producer_rabbitmq_%', 'NOT LIKE')
+    ->condition('name', 'message_broker_producer_application_id', !=)
     ->execute();
 
   if ($cleanup_status == TRUE) {
@@ -217,5 +219,8 @@ function message_broker_producer_update_7002(&$sandbox) {
     'primary key' => array('machine_name'),
   );
 
-  db_create_table('message_broker_producer_productions', $schema['message_broker_producer_productions']);
+  // Remove check once upgrade is complete. DS specific fix to deal with race condition with dosomething_mbp hook_install
+  if (!db_table_exists('message_broker_producer_productions')) {
+    db_create_table('message_broker_producer_productions', $schema['message_broker_producer_productions']);
+  }
 }
