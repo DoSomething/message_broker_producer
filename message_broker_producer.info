@@ -1,6 +1,6 @@
 name = "Message Broker Producer"
 description = "Provides producer access to for a Drupal site to a Message Broker (RabbitMQ) system."
-version = 0.2.03
+version = 0.2.04
 core = 7.x
 
 dependencies[] = libraries
