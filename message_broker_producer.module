@@ -224,16 +224,19 @@ function message_broker_producer_request($production = '', $param = array()) {
         );
 
         foreach ($production_settings->queues as $production_queue => $queue) {
+          foreach ($queue->binding_patterns as $binding_count => $binding_pattern) {
 
-          $config['queue'][$production_queue] = array(
-            'name' => $production_queue,
-            'passive' => $queue->passive,
-            'durable' => $queue->durable,
-            'exclusive' => $queue->exclusive,
-            'auto_delete' => $queue->auto_delete,
-            'bindingKey' => $queue->binding_pattern,
-          );
+            $production_queue_id = $production_queue . '-' . $binding_count;
+            $config['queue'][$production_queue_id] = array(
+              'name' => $production_queue,
+              'passive' => $queue->passive,
+              'durable' => $queue->durable,
+              'exclusive' => $queue->exclusive,
+              'auto_delete' => $queue->auto_delete,
+              'bindingKey' => $binding_pattern,
+            );
 
+          }
         }
 
         try {
