@@ -68,8 +68,7 @@ function message_broker_producer_requirements($phase) {
 
   if ($phase == 'runtime') {
 
-    $phplib_library = libraries_detect('messagebroker-phplib');
-    $config_library = libraries_detect('messagebroker-config');
+    $library = libraries_detect('messagebroker-phplib');
 
     // Get name of appropriate localization function.
     $t = get_t();
