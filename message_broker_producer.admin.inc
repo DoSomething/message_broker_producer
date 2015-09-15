@@ -368,7 +368,7 @@ function message_broker_producer_production_options_form($form, &$form_state, $t
       );
 
       if ($production_config->type == 'topic') {
-        $form['queues']['message_broker_producer_queue_' . $queue->name]['#suffix'] = 'Binding Pattern: <strong>' . $queue->binding_pattern . '</strong></div>';
+        $form['queues']['message_broker_producer_queue_' . $queue->name]['#suffix'] = 'Binding Pattern(s): <strong>' . print_r($queue->binding_patterns, TRUE) . '</strong></div>';
       }
       else {
         $form['queues']['message_broker_producer_queue_' . $queue->name]['#suffix'] = 'Binding Key: <strong>' . $queue->binding_key . '</strong></div>';
