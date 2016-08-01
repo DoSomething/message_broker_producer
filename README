@@ -1,5 +1,4 @@
- Message Broker Producer
-=================
+##Message Broker Producer
 
 This Drupal 7 module provides producer access to the Message Broker / Quicksilver system.
 * Wrapper function for Object Library calls
