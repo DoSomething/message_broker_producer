@@ -16,6 +16,5 @@ This Drupal 7 module provides producer access to the Message Broker / Quicksilve
 ### Administration Access:
 - Once the module is enable goto: `/admin/config/services/message-broker-producer`
 
-
-
+-----
 Sponsored by DoSomething.org
